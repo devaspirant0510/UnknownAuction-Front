@@ -68,6 +68,7 @@ const AuctionChatBody: FC<Props> = ({ auctionId, type }) => {
 
     let lastDate = '';
 
+    console.log(auction);
     return (
         <div className='px-8 pb-4 rounded-xl shadow-sm border-1'>
             <div ref={scrollRef} className='flex h-[48vh] flex-col overflow-y-scroll'>
@@ -77,7 +78,7 @@ const AuctionChatBody: FC<Props> = ({ auctionId, type }) => {
                     if (showDateSeparator) lastDate = currentDate;
 
                     const isLast = index === messages.length - 1;
-                    const isMe = v.user.id === id;
+                    const isMe = v.userId === id;
 
                     return (
                         <React.Fragment key={index}>
@@ -87,7 +88,13 @@ const AuctionChatBody: FC<Props> = ({ auctionId, type }) => {
                                 className={`my-1 flex ${isMe ? 'justify-end' : ''}`}
                                 ref={isLast ? null : null}
                             >
-                                <AuctionChatItem data={v} isMe={isMe} type={type} />
+                                <AuctionChatItem
+                                    auctionTitle={auction?.data?.auction?.goods?.title ?? ''}
+                                    data={v}
+                                    ownerId={auction?.data?.auction.user.id}
+                                    isMe={isMe}
+                                    type={type}
+                                />
                             </div>
                         </React.Fragment>
                     );
