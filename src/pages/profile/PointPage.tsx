@@ -9,6 +9,7 @@ import {
     UserPointCountFooter,
 } from '@/widgets/user';
 import { Gift, CreditCard, ShoppingCart, Coins } from 'lucide-react';
+import {AppLayout} from "@/shared/layout";
 
 const PointPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -93,7 +94,7 @@ const PointPage = () => {
     };
 
     return (
-        <MainLayout>
+        <AppLayout>
             <FetchMyPointHistory>
                 {(data) => {
                     const { totalEarned, totalSpent } = calculateSummary(data);
@@ -130,7 +131,7 @@ const PointPage = () => {
                     );
                 }}
             </FetchMyPointHistory>
-        </MainLayout>
+        </AppLayout>
     );
 };
 

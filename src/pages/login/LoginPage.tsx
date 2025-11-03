@@ -8,6 +8,7 @@ import useInput from '@shared/hooks/useInput.ts';
 import { axiosClient } from '@shared/lib';
 import { useAuthStore } from '@shared/store/AuthStore.ts';
 import { Navigate } from 'react-router';
+import {AppLayout} from "@/shared/layout";
 
 function LoginPage() {
     const [isLoginPanOpen, setIsLoginPanOpen] = useState(false);
@@ -49,7 +50,7 @@ function LoginPage() {
     }
 
     return (
-        <MainLayout>
+        <AppLayout>
             <div style={{ padding: '40px 110px', textAlign: 'center', color: '#f26522' }}>
                 <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>LOGIN</h2>
 
@@ -177,63 +178,8 @@ function LoginPage() {
                 {/* 로그인 모달 */}
                 <LoginPan isOpen={isLoginPanOpen} onClose={handleLoginPanClose} />
 
-                {/* 푸터 */}
-                <footer
-                    style={{
-                        marginTop: '80px',
-                        backgroundColor: '#444',
-                        color: '#fff',
-                        padding: '40px 20px',
-                    }}
-                >
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            flexWrap: 'wrap',
-                        }}
-                    >
-                        <div style={{ lineHeight: '1.6', fontSize: '14px' }}>
-                            <strong>Unknown Auction</strong>
-                            <br />
-                            <a
-                                href='/company'
-                                style={{
-                                    color: '#fff',
-                                    marginRight: '10px',
-                                    textDecoration: 'none',
-                                }}
-                            >
-                                회사소개
-                            </a>
-                            <a
-                                href='/terms'
-                                style={{
-                                    color: '#fff',
-                                    marginRight: '10px',
-                                    textDecoration: 'none',
-                                }}
-                            >
-                                이용약관
-                            </a>
-                            <a href='/privacy' style={{ color: '#fff', textDecoration: 'none' }}>
-                                개인정보처리방침
-                            </a>
-                            <br />
-                            <br />
-                            상품명 : (주)Unknown Auction
-                            <br />
-                            대표이사 : OOO
-                            <br />
-                            Tel: 010-0000-0000 | Fax: 02-000-0000
-                            <br />
-                            사업자 등록번호 : 000-00-000000
-                        </div>
-                    </div>
-                </footer>
             </div>
-        </MainLayout>
+        </AppLayout>
     );
 }
 
