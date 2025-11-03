@@ -21,6 +21,7 @@ type TodoItem = {
 const HomePage = () => {
     return (
         <AppLayout>
+            <img src={'/img/banner.png'} className={'-z-1 -mt-48'} />
             <BaseLayout>
                 <HotAuctionList />
             </BaseLayout>
