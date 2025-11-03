@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { ProfileImage } from '@shared/ui';
 import { ShareProfileModal } from '@/features/profile/ui/ShareProfileModal.tsx';
+import {Link} from "react-router";
 
 interface User {
     nickname: string;
     email: string;
     url: string;
     cash?: number;
-    interestedCount?: number;
+    wishListCount?: number;
     biddingCount?: number;
     onEditClick: () => void;
 }
@@ -17,7 +18,7 @@ const MyProfile = ({
     email,
     url,
     cash,
-    interestedCount,
+    wishListCount,
     biddingCount,
     onEditClick,
 }: User) => {
@@ -79,21 +80,23 @@ const MyProfile = ({
                             {cash?.toLocaleString() || 0}
                         </span>
                     </div>
-                    <div
-                        className='flex justify-between border-2 p-5 text-center items-center'
-                        style={{
-                            borderColor: '#CBA89A',
-                            fontSize: '16px',
-                            borderLeft: 'none',
-                            borderRight: 'none',
-                            borderBottom: 'none',
-                        }}
-                    >
-                        <span style={{ color: '#969696' }}>관심 상품</span>
-                        <span style={{ color: '#F7A17E', fontSize: '24px', fontWeight: 'bold' }}>
-                            {interestedCount || 0}
-                        </span>
-                    </div>
+                    <Link to='/profile/interests-view'>
+                        <div
+                            className='flex justify-between border-2 p-5 text-center items-center cursor-pointer hover:bg-gray-50 transition-colors' // 3. cursor-pointer, hover 효과 추가
+                            style={{
+                                borderColor: '#CBA89A',
+                                fontSize: '16px',
+                                borderLeft: 'none',
+                                borderRight: 'none',
+                                borderBottom: 'none',
+                            }}
+                        >
+                            <span style={{ color: '#969696' }}>관심 상품</span>
+                            <span style={{ color: '#F7A17E', fontSize: '24px', fontWeight: 'bold' }}>
+                                {wishListCount || 0}
+                            </span>
+                        </div>
+                    </Link>
                     <div
                         className='flex justify-between border-2 p-5 text-center items-center'
                         style={{
