@@ -1,8 +1,9 @@
 import React, { FC } from 'react';
 import { useParams } from 'react-router';
 import { AuctionInfo, RecommendsGoods } from '@/features/auction/ui';
-import { MainLayout } from '@shared/layout';
+import { BaseLayout, MainLayout } from '@shared/layout';
 import { useIncreaseAuctionView } from '@/features/auction/hooks';
+import USperator from '@shared/ui/USperator.tsx';
 
 type Params = {
     id: number;
@@ -14,10 +15,14 @@ const BlindAuctionInfoPage = () => {
     }
     useIncreaseAuctionView(id);
     return (
-        <MainLayout>
+        <div>
+            <MainLayout>{}</MainLayout>
             <AuctionInfo id={id} type={'blind'} />
-            <RecommendsGoods id={id} />
-        </MainLayout>
+            <USperator data={'다른 경매 상품'} />
+            <BaseLayout>
+                <RecommendsGoods id={id} />
+            </BaseLayout>
+        </div>
     );
 };
 
