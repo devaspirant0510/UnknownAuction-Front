@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { CalendarDaysIcon, EllipsisIcon, TriangleAlertIcon } from 'lucide-react';
+import { CalendarDaysIcon, EllipsisIcon, GavelIcon, TriangleAlertIcon } from 'lucide-react';
 import BiddingDialog from '@widgets/auction/dialog/BiddingDialog.tsx';
 import { Client } from 'stompjs';
 import AuctionHistoryDialog from '@widgets/auction/dialog/AuctionHistoryDialog.tsx';
@@ -58,7 +58,14 @@ const AuctionChatSideMenu: FC<Props> = ({ client }) => {
                 </div>
                 <span className={'text-xs mt-1'}>신고하기</span>
             </div>
-            <BiddingDialog client={client} />
+            <BiddingDialog client={client}>
+                <div className='bg-white border-[#FFD1BE] border flex flex-col items-center py-3 px-2 rounded-b-2xl shadow hover:shadow-lg transition-shadow cursor-pointer'>
+                    <div className='w-10 h-10 bg-[#FFD1BE] rounded-full flex justify-center items-center shadow-md'>
+                        <GavelIcon className='text-[#FEFDFD] border-0.5 border-[#DADADA]' />
+                    </div>
+                    <span className='text-xs mt-1 font-semibold text-[#FF7A00]'>입찰하기</span>
+                </div>
+            </BiddingDialog>
         </div>
     );
 };
