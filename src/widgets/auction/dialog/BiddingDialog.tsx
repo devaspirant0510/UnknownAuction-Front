@@ -18,10 +18,12 @@ import { FetchMyProfile } from '@/features/user/ui';
 import FetchLastBidPrice from '@/features/auction/ui/FetchLastBidPrice';
 import { axiosClient } from '@shared/lib';
 import { useQueryClient } from '@tanstack/react-query';
+import { Badge } from '@shared/components/ui';
 
 type Params = {
     id: number;
 };
+
 type Props = {
     client: Client;
     children: React.ReactNode;
@@ -40,44 +42,95 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
     const onClickBid = useCallback(
         async (lastPriceArg?: number) => {
             try {
-                const inputValue = value ? Number(value) : 0; // 입력값 = 최종 입찰가
+                const inputValue = value ? Number(value) : 0;
                 const lastPriceFromData =
                     data?.data?.lastBiddingLog?.price ?? data?.data?.auction?.startPrice ?? 0;
                 const lastPrice =
                     typeof lastPriceArg === 'number' ? lastPriceArg : lastPriceFromData;
 
-                // 실제 결제할 금액 = 입찰가 - 이미 낸 금액
                 const paymentAmount = lastPrice > 0 ? inputValue - lastPrice : inputValue;
 
-                // send numeric amount to payment API (차액만 보냄)
                 const paymentResult = await axiosClient.post('/api/v1/auction/payment', {
                     auctionId: auctionId,
                     amount: paymentAmount,
                 });
+
                 console.log(paymentResult);
 
                 const jsondata = {
-                    contents: String(inputValue), // 최종 입찰가를 채팅에 표시
+                    contents: String(inputValue),
                     nickname: userNickname,
                     userId: userId,
                     bid: {
-                        price: inputValue, // 최종 입찰가
+                        price: inputValue,
                         prevPrice: lastPrice === 0 ? data?.data?.auction.startPrice : lastPrice,
                     },
                 };
+
                 (client as any).publish({
                     destination: '/app/chat/send/' + auctionId,
                     body: JSON.stringify(jsondata),
                 });
-                await queryClient.resetQueries({ queryKey: ['api', 'v1', 'profile', 'my'] } as any);
+
+                await queryClient.resetQueries({
+                    queryKey: ['api', 'v1', 'profile', 'my'],
+                } as any);
             } catch (e) {
                 console.error(e);
             }
+
             setOpen(false);
             setValue('');
         },
         [value, data, userNickname, userId, auctionId, client, queryClient, setValue],
     );
+
+    // 최저가로 입찰하기 핸들러
+    const onClickMinBid = useCallback(() => {
+        const currentPrice =
+            data?.data?.lastBiddingLog?.price ?? data?.data?.auction?.startPrice ?? 0;
+        const bidUnit = data?.data?.auction?.bidUnit ?? 1;
+        const minBidValue = currentPrice + bidUnit;
+        setValue(String(minBidValue));
+    }, [data, setValue]);
+
+    // 최대가로 입찰하기 핸들러
+    const onClickMaxBid = useCallback(
+        (userPoint: number, lastPrice: number) => {
+            const currentPrice =
+                data?.data?.lastBiddingLog?.price ?? data?.data?.auction?.startPrice ?? 0;
+            const bidUnit = data?.data?.auction?.bidUnit ?? 1;
+            const startPrice = data?.data?.auction?.startPrice ?? 0;
+
+            // 사용 가능한 최대 포인트
+            const maxAvailable = userPoint + lastPrice;
+
+            // 시작가 기준으로 입찰단위에 맞는 최대값 계산
+            const unitsFromStart = Math.floor((maxAvailable - startPrice) / bidUnit);
+            const maxBidValue = startPrice + unitsFromStart * bidUnit;
+
+            // 현재가보다 높아야 함
+            const finalMaxBid = Math.max(maxBidValue, currentPrice + bidUnit);
+
+            setValue(String(finalMaxBid));
+        },
+        [data, setValue],
+    );
+
+    // 입찰 금액 증가 핸들러
+    const onClickAddAmount = useCallback(
+        (multiplier: number) => {
+            const bidUnit = data?.data?.auction?.bidUnit ?? 1;
+            const currentValue = value ? Number(value) : 0;
+            const addAmount = bidUnit * multiplier;
+            if (currentValue + addAmount < 0) {
+                return;
+            }
+            setValue(String(currentValue + addAmount));
+        },
+        [data, value, setValue],
+    );
+
     if (isLoading) {
         return (
             <div className='flex items-center justify-center h-40'>
@@ -85,6 +138,7 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
             </div>
         );
     }
+
     if (isError) {
         return (
             <div className='flex items-center justify-center h-40'>
@@ -92,6 +146,7 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
             </div>
         );
     }
+
     if (!data || !data.data) {
         return (
             <div className='flex items-center justify-center h-40'>
@@ -99,8 +154,11 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
             </div>
         );
     }
+
     const auctionCurrentPrice =
         data?.data?.lastBiddingLog?.price ?? data?.data?.auction?.startPrice!;
+    const bidUnit = data?.data?.auction?.bidUnit ?? 1;
+    const startPrice = data?.data?.auction?.startPrice ?? 0;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -134,27 +192,36 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                 <FetchMyProfile>
                                     {(user) => {
                                         const point = user.point ?? 0;
-                                        const inputValue = value ? Number(value) : 0; // 입력값 = 최종 입찰가
+                                        const inputValue = value ? Number(value) : 0;
                                         const lastPrice = lastPriceFromApi ?? 0;
 
-                                        // 실제 결제할 금액 = 입찰가 - 이미 낸 금액
                                         const paymentAmount =
                                             lastPrice > 0
                                                 ? Math.max(0, inputValue - lastPrice)
                                                 : inputValue;
 
-                                        // 블라인드 경매가 아닐 때만 가격 검증
                                         const minBidPrice = isBlind
                                             ? 0
                                             : Math.max(auctionCurrentPrice, lastPrice);
+
+                                        // 입찰단위 유효성 검사 (시작가격 기준)
+                                        const isValidBidUnit = isBlind
+                                            ? true
+                                            : inputValue > 0 &&
+                                              (inputValue - startPrice) % bidUnit === 0;
 
                                         const isOver = paymentAmount > point;
                                         const isTooLow = isBlind
                                             ? false
                                             : inputValue <= minBidPrice;
                                         const isInvalid =
-                                            !value || inputValue < 1 || isOver || isTooLow;
+                                            !value ||
+                                            inputValue < 1 ||
+                                            isOver ||
+                                            isTooLow ||
+                                            !isValidBidUnit;
                                         const willRemain = point - paymentAmount;
+
                                         return (
                                             <>
                                                 {/* 현재 경매 가격 - 블라인드 경매에서는 숨김 */}
@@ -170,6 +237,9 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                                                     P
                                                                 </span>
                                                             </div>
+                                                        </div>
+                                                        <div className='mt-2 text-xs text-gray-600'>
+                                                            입찰 단위: {bidUnit.toLocaleString()}P
                                                         </div>
                                                     </div>
                                                 )}
@@ -244,17 +314,95 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                                         placeholder={
                                                             isBlind
                                                                 ? '입찰할 금액을 입력하세요'
-                                                                : `${minBidPrice + 1} 이상 입력`
+                                                                : `${minBidPrice + bidUnit} 이상 입력`
                                                         }
                                                         className='w-full text-lg px-4 py-3 border-2 border-[#FFD1BE] focus:border-[#FF7A00] rounded-lg shadow-sm focus:ring-2 focus:ring-[#FF7A00]/20'
                                                     />
                                                 </div>
 
+                                                {/*빠른 입찰 금액 증가 칩 */}
+
+                                                <div className='flex gap-2 mb-4 justify-between'>
+                                                    {/* +1 단위 */}
+                                                    <button
+                                                        type='button'
+                                                        onClick={() => onClickAddAmount(1)}
+                                                        className='flex-1 px-4 py-2 rounded-full text-sm font-semibold text-[#FF7A00] border border-[#FF7A00] bg-white transition-all duration-200 hover:bg-[#FF7A00] hover:text-white! hover:shadow-md active:scale-[0.97]'
+                                                    >
+                                                        +{bidUnit.toLocaleString()}P
+                                                    </button>
+
+                                                    {/* +5 단위 */}
+                                                    <button
+                                                        type='button'
+                                                        onClick={() => onClickAddAmount(5)}
+                                                        className='flex-1 px-4 py-2 rounded-full text-sm font-semibold text-[#FF9A3E] border border-[#FF9A3E] bg-white transition-all duration-200 hover:bg-[#FF9A3E] hover:text-white! hover:shadow-md active:scale-[0.97]'
+                                                    >
+                                                        +{(bidUnit * 5).toLocaleString()}P
+                                                    </button>
+
+                                                    {/* +10 단위 */}
+                                                    <button
+                                                        type='button'
+                                                        onClick={() => onClickAddAmount(10)}
+                                                        className='flex-1 px-4 py-2 rounded-full text-sm font-semibold text-[#FFB366] border border-[#FFB366] bg-white transition-all duration-200 hover:bg-[#FFB366] hover:text-white! hover:shadow-md active:scale-[0.97]'
+                                                    >
+                                                        +{(bidUnit * 10).toLocaleString()}P
+                                                    </button>
+
+                                                    {/* -1 단위 */}
+                                                    <button
+                                                        type='button'
+                                                        onClick={() => onClickAddAmount(-1)}
+                                                        className='flex-1 px-4 py-2 rounded-full text-sm font-semibold text-red-500 border border-red-500 bg-white transition-all duration-200 hover:bg-red-500 hover:text-white! hover:shadow-md active:scale-[0.97]'
+                                                    >
+                                                        -{bidUnit.toLocaleString()}P
+                                                    </button>
+                                                </div>
+
+                                                {/* 최저가/최대가로 입찰하기 버튼 */}
+                                                {!isBlind && (
+                                                    <div className='flex gap-2 mb-3'>
+                                                        <Button
+                                                            type='button'
+                                                            variant='outline'
+                                                            onClick={onClickMinBid}
+                                                            className='flex-1 border-2 border-[#FFD1BE] text-[#FF7A00] hover:bg-orange-50'
+                                                        >
+                                                            최저가로 입찰
+                                                            <br />
+                                                            <span className='text-xs'>
+                                                                (
+                                                                {(
+                                                                    auctionCurrentPrice + bidUnit
+                                                                ).toLocaleString()}
+                                                                P)
+                                                            </span>
+                                                        </Button>
+                                                        <Button
+                                                            type='button'
+                                                            variant='outline'
+                                                            onClick={() =>
+                                                                onClickMaxBid(point, lastPrice)
+                                                            }
+                                                            className='flex-1 border-2 border-[#FFD1BE] text-[#FF7A00] hover:bg-orange-50'
+                                                            disabled={point < 1}
+                                                        >
+                                                            최대가로 입찰
+                                                            <br />
+                                                            <span className='text-xs'>
+                                                                (보유 포인트 최대)
+                                                            </span>
+                                                        </Button>
+                                                    </div>
+                                                )}
+
                                                 {/* 결제 정보 표시 */}
                                                 {value &&
                                                     !isOver &&
                                                     (!isTooLow || isBlind) &&
-                                                    inputValue > 0 && (
+                                                    inputValue > 0 &&
+                                                    isValidBidUnit && (
                                                         <div className='bg-green-50 border border-green-200 rounded-xl p-4 mb-3'>
                                                             <div className='space-y-2'>
                                                                 {lastPrice > 0 && (
@@ -264,7 +412,7 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                                                                 입찰 금액
                                                                             </span>
                                                                             <span className='font-semibold text-gray-800'>
-                                                                                {inputValue.toLocaleString()}
+                                                                                {inputValue.toLocaleString()}{' '}
                                                                                 P
                                                                             </span>
                                                                         </div>
@@ -274,7 +422,7 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                                                             </span>
                                                                             <span className='font-semibold text-blue-600'>
                                                                                 -{' '}
-                                                                                {lastPrice.toLocaleString()}
+                                                                                {lastPrice.toLocaleString()}{' '}
                                                                                 P
                                                                             </span>
                                                                         </div>
@@ -288,7 +436,7 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                                                             : '결제 금액'}
                                                                     </span>
                                                                     <span className='text-xl font-bold text-[#FF7A00]'>
-                                                                        {paymentAmount.toLocaleString()}
+                                                                        {paymentAmount.toLocaleString()}{' '}
                                                                         P
                                                                     </span>
                                                                 </div>
@@ -297,7 +445,7 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                                                         남은 포인트
                                                                     </span>
                                                                     <span className='font-semibold text-green-700'>
-                                                                        {willRemain.toLocaleString()}
+                                                                        {willRemain.toLocaleString()}{' '}
                                                                         P
                                                                     </span>
                                                                 </div>
@@ -305,18 +453,32 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                                         </div>
                                                     )}
 
-                                                {/* 에러 메시지 - 블라인드 경매에서는 가격 관련 에러 숨김 */}
+                                                {/* 에러 메시지 */}
                                                 {!isBlind && isTooLow && value && (
                                                     <div className='text-red-500 text-sm mb-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
                                                         ⚠️ {minBidPrice.toLocaleString()}P보다 높은
                                                         금액을 입력해주세요.
                                                     </div>
                                                 )}
+
+                                                {!isBlind &&
+                                                    value &&
+                                                    !isValidBidUnit &&
+                                                    inputValue > 0 && (
+                                                        <div className='text-red-500 text-sm mb-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
+                                                            ⚠️ 입찰 금액은 시작가(
+                                                            {startPrice.toLocaleString()}P) 기준으로{' '}
+                                                            {bidUnit.toLocaleString()}P 단위로
+                                                            입찰해야 합니다.
+                                                        </div>
+                                                    )}
+
                                                 {point < 1 && (
                                                     <div className='text-red-500 text-sm mb-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
                                                         ⚠️ 포인트가 부족하여 입찰할 수 없습니다.
                                                     </div>
                                                 )}
+
                                                 {isOver && (
                                                     <div className='text-red-500 text-sm mb-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
                                                         ⚠️ 보유 포인트를 초과할 수 없습니다. (사용
