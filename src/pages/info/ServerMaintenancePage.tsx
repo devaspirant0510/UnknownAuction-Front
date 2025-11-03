@@ -7,6 +7,7 @@ const ServerMaintenancePage = () => {
     return (
         <div className='flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4'>
             <div className='max-w-md text-center'>
+                <img src={'/img/logo.svg'} className={'mx-auto'} alt={'로고'} />
                 <img
                     src={serverMaintenanceImage}
                     alt='서버 점검 중인 캐릭터'
