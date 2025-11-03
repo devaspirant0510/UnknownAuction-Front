@@ -5,7 +5,6 @@ import MyActive from '@/features/profile/ui/MyActive.tsx';
 import MyFeedList from '@/features/profile/ui/MyFeedList.tsx';
 import MySales from '@/features/profile/ui/MySales.tsx';
 import MyBuys from '@/features/profile/ui/MyBuys.tsx';
-import { Header } from '@widgets/ui';
 import { useQuery } from '@tanstack/react-query';
 import { httpFetcher } from '@shared/lib';
 import { ApiResult } from '@entities/common';
@@ -15,7 +14,7 @@ import { EditProfileModal } from '@/features/profile/ui/EditProfileModal.tsx';
 import { AppLayout } from '@shared/layout';
 import {toast} from "react-toastify";
 import { useAuthStore } from '@shared/store/AuthStore.ts';
-import { Navigate, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import NotFoundPage from "@/pages/common/NotFoundPage";
 import {LoadingPage} from "@/pages/common";
 
@@ -71,7 +70,7 @@ export const ProfilePage = () => {
                             email={data.data.user.email}
                             url={data.data.user.profileUrl}
                             cash={data?.data?.user.point}
-                            interestedCount={statusData?.data?.interestedCount}
+                            wishListCount={statusData?.data?.wishListCount}
                             biddingCount={statusData?.data?.biddingCount}
                             onEditClick={() => setIsEditModalOpen(true)}
                         />

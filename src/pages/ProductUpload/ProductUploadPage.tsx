@@ -13,6 +13,7 @@ import { axiosClient, DateUtil, getServerURL } from '@shared/lib';
 import { toast } from 'react-toastify';
 import { Navigate, useNavigate } from 'react-router';
 import { useAuthStore } from '@shared/store/AuthStore.ts';
+import {AppLayout} from "@/shared/layout";
 
 export default function ProductUploadPage() {
     const [title, setTitle] = useState('');
@@ -113,7 +114,7 @@ export default function ProductUploadPage() {
         }
     }, []);
     return (
-        <MainLayout>
+        <AppLayout>
             <div className='max-w-2xl mx-auto p-6'>
                 <h1 className='text-2xl font-bold mb-6 text-orange-600'>상품 등록</h1>
 
@@ -153,6 +154,6 @@ export default function ProductUploadPage() {
 
                 <SubmitButtons onSubmit={handleSubmit} />
             </div>
-        </MainLayout>
+        </AppLayout>
     );
 }
