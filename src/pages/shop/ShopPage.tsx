@@ -14,6 +14,13 @@ import { AppLayout, MainLayout } from '@shared/layout';
 import ShopPayButton from '@/features/shop/ui/ShopPayButton.tsx';
 import { getPaymentConfig } from '@/features/shop/lib/getPaymentConfig.ts';
 import AuthUser from '@/features/user/ui/AuthUser.tsx';
+import { useQuery } from '@tanstack/react-query';
+import { useAuthUser } from '@shared/hooks/useAuthUser.tsx';
+import { httpFetcher } from '@shared/lib';
+import { ApiResult } from '@entities/common';
+import { LoadingPage } from '@pages/common';
+import LoginPage from "@/pages/login/LoginPage";
+import {Link} from "react-router";
 
 // 결제 수단 아이콘 매핑
 const paymentMethodIcons = {
@@ -38,10 +45,45 @@ const PointRechargePage = () => {
     const [selectedMethod, setSelectedMethod] = useState('간편결제');
     const [agreedTerms, setAgreedTerms] = useState(false);
 
+    const [_, id] = useAuthUser();
+    const {
+        isLoading,
+        data: profileData,
+        isError,
+        error
+    } = useQuery({
+        queryKey: ['api', 'v1', 'profile', id],
+        queryFn: httpFetcher<ApiResult<any>>,
+        enabled: !!id,
+    });
+
     // 선택된 옵션/가격 계산 (렌더 시 계산)
     const selectedOption = paymentOptions.find((option) => option.value === selectedAmount);
     const actualPrice = selectedOption ? parseInt(selectedOption.price.replace(/[^0-9]/g, '')) : 0;
     const paymentConfig = getPaymentConfig(selectedMethod);
+
+    if (isLoading) {
+        return <LoadingPage />;
+    }
+
+    if (isError) {
+        console.error("포인트 페이지 프로필 로딩 오류:", error);
+        return (
+            <AppLayout>
+                <div>데이터를 불러오는 데 실패했습니다.</div>
+            </AppLayout>
+        );
+    }
+
+    if (!profileData || !profileData.data) {
+        return (
+            <LoginPage />
+        );
+    }
+
+    const { user } = profileData.data;
+    const currentPoints = user.point;
+    const nickname = user.nickname;
 
     return (
         <AppLayout>
@@ -61,7 +103,7 @@ const PointRechargePage = () => {
                             <div className='space-y-6'>
                                 <div className='mb-6'>
                                     <p className='text-gray-600 text-sm'>
-                                        <span className='font-semibold'>도란</span> 님의 보유 포인트
+                                        <span className='font-semibold'>{nickname}</span> 님의 보유 포인트
                                         내역
                                     </p>
                                 </div>
@@ -77,7 +119,7 @@ const PointRechargePage = () => {
                                                 총 보유 포인트
                                             </span>
                                             <span className='text-3xl font-bold'>
-                                                100,000 <span className='text-xl'>p</span>
+                                                {currentPoints.toLocaleString()} <span className='text-xl'>p</span>
                                             </span>
                                         </div>
 
@@ -100,7 +142,7 @@ const PointRechargePage = () => {
                                                 충전 후 포인트
                                             </span>
                                             <span className='text-4xl font-extrabold'>
-                                                {(100000 + Number(selectedAmount)).toLocaleString()}
+                                                {(currentPoints + Number(selectedAmount)).toLocaleString()}
                                                 <span className='text-2xl'>p</span>
                                             </span>
                                         </div>
@@ -108,7 +150,9 @@ const PointRechargePage = () => {
 
                                     <div className='flex items-center mt-6 text-sm opacity-80 cursor-pointer hover:opacity-100 transition-opacity'>
                                         <ShoppingBag className='h-4 w-4 mr-2' />
-                                        <span>이용내역</span>
+                                        <Link to={'/profile/point'}>
+                                            <span>이용내역</span>
+                                        </Link>
                                     </div>
                                 </div>
 

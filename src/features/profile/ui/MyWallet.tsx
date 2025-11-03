@@ -35,12 +35,14 @@ const MyWallet = ({ cash }: MyWalletProps) => {
                     style={{ backgroundColor: '#FFE7DD' }}
                 >
                     <div>
-                        <button
-                            className='px-4 py-2 rounded-xl border'
-                            style={{ backgroundColor: '#FFF3EE', color: '#F88A5B' }}
-                        >
-                            충전하기
-                        </button>
+                        <Link to={'/shop'}>
+                            <button
+                                className='px-4 py-2 rounded-xl border'
+                                style={{ backgroundColor: '#FFF3EE', color: '#F88A5B' }}
+                            >
+                                충전하기
+                            </button>
+                        </Link>
                     </div>
                     <div>
                         <Link to={'/profile/point'}>
