@@ -28,6 +28,7 @@ const HotAuctionList = () => {
                         </div>
                     );
                 })}
+                {data.data.length < 4 && <div className={'w-full h-full'}></div>}
             </div>
         </div>
     );
