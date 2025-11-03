@@ -1,5 +1,5 @@
-import React, { FC, useCallback, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import { useInfiniteQueryGetAuction } from '@/features/auction/lib/useInfiniteQueryGetAuction';
 import { Card, CardContent } from '@shared/components/ui/card.tsx';
 import { Button } from '@shared/components/ui/button.tsx';
@@ -20,12 +20,21 @@ type Props = {
 };
 
 const AuctionList: FC<Props> = ({ type }) => {
+    const location = useLocation();
     const navigate = useNavigate();
+    const [currentCategory, setCategory] = useState();
     const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
-        useInfiniteQueryGetAuction(type);
+        useInfiniteQueryGetAuction(type, currentCategory);
     const loaderRef = useRef<HTMLDivElement | null>(null);
     const fetchingRef = useRef(false);
 
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const category = params.get('category'); // category 값 가져오기
+        console.log(category);
+        setCategory(category);
+        // 여기서 category 바뀌었을 때 처리
+    }, [location.search]); // sear
     useEffect(() => {
         const loader = loaderRef.current;
         if (!loader) return;

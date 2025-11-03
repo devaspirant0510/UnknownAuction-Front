@@ -1,26 +1,43 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { axiosClient, getServerURL, toastError } from '@shared/lib';
+import { axiosClient, getServerURL, httpFetcher, toastError } from '@shared/lib';
 import { toast } from 'react-toastify';
 import { ArrowUpDownIcon, ImagePlus, PackageIcon, X as XIcon, Loader2 } from 'lucide-react';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter,
-    DialogClose,
-} from '@/shared/components/ui/dialog';
+import { useQueryClient, useMutation, useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/shared/components/ui/skeleton';
 import { ApiResult, Page } from '@entities/common';
 import { FeedListResponse } from '@entities/feed/model';
+
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/shared/components/ui/collapsible';
+
 interface InfiniteData<T> {
     pages: T[];
     pageParams: any[];
 }
+
 interface ModalProps {
     onClose: () => void;
+}
+
+interface PromoItem {
+    endTime: string;
+    auctionId: number;
+    categoryName: string;
+    auctionDescription: string;
+    startTime: string;
+    auctionTitle: string;
+    thumbnail: string;
+}
+
+interface PromoResponse {
+    data: PromoItem[];
+    message: string;
+    success: boolean;
+    error: any;
+    timestamp?: string;
 }
 
 export const FeedModal = ({ onClose }: ModalProps) => {
@@ -31,12 +48,11 @@ export const FeedModal = ({ onClose }: ModalProps) => {
     const prevUrlsRef = useRef<string[]>([]);
     const queryClient = useQueryClient();
 
-    // 내 상품 홍보 다이얼로그 상태
+    // Collapsible open/close 상태
     const [isPromoOpen, setPromoOpen] = useState(false);
-    const [promoLoading, setPromoLoading] = useState(false);
-    const [promoItems, setPromoItems] = useState<
-        Array<{ id: number; title: string; price: number; thumb: string }>
-    >([]);
+
+    // ✅ [신규] 선택된 홍보 상품을 저장할 state
+    const [selectedPromo, setSelectedPromo] = useState<PromoItem | null>(null);
 
     useEffect(() => {
         return () => {
@@ -53,7 +69,7 @@ export const FeedModal = ({ onClose }: ModalProps) => {
             prevUrlsRef.current = prevUrlsRef.current.concat(newUrls);
             setFiles((prev) => prev.concat(added));
             setPreviewUrls((prev) => prev.concat(newUrls));
-            if (inputRef.current) inputRef.current.value = '';
+            inputRef.current!.value = '';
         }
     };
 
@@ -66,10 +82,17 @@ export const FeedModal = ({ onClose }: ModalProps) => {
     };
 
     const triggerFilePicker = () => {
-        inputRef.current?.click();
+        inputRef.current!.click();
     };
 
-    // ✅ useMutation: 게시글 등록 로직
+    const promoQuery = useQuery<PromoResponse>({
+        queryKey: ['api', 'v1', 'feed', 'my', 'auction'],
+        queryFn: httpFetcher,
+        enabled: isPromoOpen,
+        staleTime: 0,
+    });
+
+    // ✅ [수정] useMutation: auctionId도 함께 전송
     const { mutate: submitFeed, isPending } = useMutation({
         mutationFn: async () => {
             if (!content.trim()) {
@@ -77,9 +100,16 @@ export const FeedModal = ({ onClose }: ModalProps) => {
             }
 
             const formData = new FormData();
+
+            // ✅ content와 함께 auctionId도 data Blob에 포함!
+            const dataToSubmit = {
+                content,
+                //auctionId: selectedPromo ? selectedPromo.auctionId : null,
+            };
+
             formData.append(
                 'data',
-                new Blob([JSON.stringify({ content })], { type: 'application/json' }),
+                new Blob([JSON.stringify(dataToSubmit)], { type: 'application/json' }),
             );
             files.forEach((f) => formData.append('files', f));
 
@@ -96,6 +126,7 @@ export const FeedModal = ({ onClose }: ModalProps) => {
             prevUrlsRef.current = [];
             setFiles([]);
             setPreviewUrls([]);
+            setSelectedPromo(null); // ✅ [추가] 성공 시 선택된 상품도 리셋
             queryClient.setQueryData(
                 ['api', 'v2', 'feed'],
                 (oldData: InfiniteData<ApiResult<Page<FeedListResponse>>>) => {
@@ -113,61 +144,15 @@ export const FeedModal = ({ onClose }: ModalProps) => {
         },
     });
 
-    const handleOpenPromo = () => {
-        setPromoOpen(true);
-        setPromoLoading(true);
-        setPromoItems([]);
-        setTimeout(() => {
-            const demo = [
-                { id: 1, title: '테스트 상품 A', price: 12900, thumb: '/img/default.png' },
-                { id: 2, title: '테스트 상품 B', price: 34900, thumb: '/img/default.png' },
-                { id: 3, title: '테스트 상품 C', price: 9900, thumb: '/img/default.png' },
-            ];
-            setPromoItems(demo);
-            setPromoLoading(false);
-        }, 1200);
-    };
-
-    const renderPromoBody = () => {
-        if (promoLoading) {
-            return (
-                <div className='space-y-3'>
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className='flex items-center gap-3'>
-                            <Skeleton className='h-12 w-12 rounded-md' />
-                            <div className='flex-1 space-y-2'>
-                                <Skeleton className='h-4 w-1/2' />
-                                <Skeleton className='h-4 w-1/3' />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            );
+    // ✅ [신규] 상품 리스트에서 아이템 클릭 시 실행될 핸들러
+    const handlePromoSelect = (item: PromoItem) => {
+        // 이미 선택된 걸 또 누르면 선택 해제 (토글)
+        if (selectedPromo?.auctionId === item.auctionId) {
+            setSelectedPromo(null);
+        } else {
+            setSelectedPromo(item);
         }
-
-        return (
-            <div className='space-y-3'>
-                {promoItems.map((it) => (
-                    <div key={it.id} className='flex items-center gap-3 p-2 rounded-md border'>
-                        <img
-                            src={it.thumb}
-                            className='w-12 h-12 rounded-md object-cover'
-                            alt={it.title}
-                        />
-                        <div className='flex-1 min-w-0'>
-                            <div className='text-sm font-medium truncate'>{it.title}</div>
-                            <div className='text-xs text-gray-500'>
-                                {it.price.toLocaleString()}원
-                            </div>
-                        </div>
-                        <button className='text-uprimary text-sm hover:underline'>홍보하기</button>
-                    </div>
-                ))}
-                {promoItems.length === 0 && (
-                    <div className='text-sm text-gray-500'>표시할 상품이 없습니다.</div>
-                )}
-            </div>
-        );
+        setPromoOpen(false); // 메뉴 닫기
     };
 
     return (
@@ -188,14 +173,49 @@ export const FeedModal = ({ onClose }: ModalProps) => {
                 </h2>
                 <hr className='border-t-1 border-uprimary' />
 
+                {/* ▼▼▼ [신규] 선택된 상품 카드뷰 ▼▼▼ */}
+                {selectedPromo && (
+                    <div className='relative mt-5 border border-orange-200 rounded-lg p-3 bg-orange-50 flex gap-3'>
+                        <img
+                            src={selectedPromo.thumbnail}
+                            alt={selectedPromo.auctionTitle}
+                            className='w-20 h-20 object-cover rounded-md'
+                        />
+                        <div className='flex-1'>
+                            <span className='inline-block bg-orange-200 text-orange-700 text-xs font-semibold px-2 py-0.5 rounded mb-1'>
+                                {selectedPromo.categoryName}
+                            </span>
+                            <h4 className='font-semibold text-gray-800'>
+                                {selectedPromo.auctionTitle}
+                            </h4>
+                            <p className='text-xs text-gray-500 mt-1'>
+                                {new Date(selectedPromo.startTime).toLocaleString()} -{' '}
+                                {new Date(selectedPromo.endTime).toLocaleString()}
+                            </p>
+                        </div>
+                        {/* 선택 해제 버튼 */}
+                        <button
+                            type='button'
+                            onClick={() => setSelectedPromo(null)}
+                            className='absolute top-2 right-2 text-gray-400 hover:text-gray-600'
+                            aria-label='홍보 상품 선택 해제'
+                        >
+                            <XIcon className='w-4 h-4' />
+                        </button>
+                    </div>
+                )}
+                {/* ▲▲▲ [신규] 선택된 상품 카드뷰 ▲▲▲ */}
+
                 <textarea
-                    className='mt-5 w-full h-80 p-4 bg-orange-50 text-gray-700 border border-orange-100 rounded-md resize-none outline-none'
+                    className={`w-full h-80 p-4 bg-orange-50 text-gray-700 border border-orange-100 rounded-md resize-none outline-none ${
+                        selectedPromo ? 'mt-3' : 'mt-5' // 카드뷰 있을 때만 mt-3
+                    }`}
                     placeholder='게시글 내용 작성'
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                 />
 
-                {/* 이미지 미리보기 */}
+                {/* 이미지 미리보기 (이하 동일) */}
                 <div className='mt-4'>
                     {previewUrls.length > 0 && (
                         <div className='flex gap-2 flex-wrap mb-2'>
@@ -233,7 +253,7 @@ export const FeedModal = ({ onClose }: ModalProps) => {
                             className='hidden'
                             onChange={handleFileChange}
                         />
-                        <div className='flex flex-col gap-1'>
+                        <div className='flex flex-col gap-1 w-full'>
                             <button
                                 type='button'
                                 onClick={triggerFilePicker}
@@ -242,14 +262,85 @@ export const FeedModal = ({ onClose }: ModalProps) => {
                                 <ImagePlus className='w-5 h-5' />
                                 <span className='font-medium text-sm'>사진 추가</span>
                             </button>
-                            <button
-                                type='button'
-                                onClick={handleOpenPromo}
-                                className='inline-flex items-center gap-2 px-3 py-1 rounded-md text-uprimary hover:bg-uprimary/10 transition'
+
+                            {/* ▼▼▼ Collapsible 부분 수정 ▼▼▼ */}
+                            <Collapsible
+                                open={isPromoOpen}
+                                onOpenChange={setPromoOpen}
+                                className='w-full'
                             >
-                                <PackageIcon className='w-5 h-5' />
-                                <span className='font-medium text-sm'>내 상품 홍보</span>
-                            </button>
+                                <CollapsibleTrigger asChild>
+                                    <button
+                                        type='button'
+                                        className='inline-flex items-center gap-2 px-3 py-1 rounded-md text-uprimary hover:bg-uprimary/10 transition'
+                                    >
+                                        <PackageIcon className='w-5 h-5' />
+                                        <span className='font-medium text-sm'>내 상품 홍보</span>
+                                    </button>
+                                </CollapsibleTrigger>
+                                <CollapsibleContent className='pt-2 animate-in slide-in-from-top-4'>
+                                    <div className='border rounded-md p-3 shadow-sm bg-white'>
+                                        <h3 className='text-sm font-semibold mb-3'>
+                                            홍보할 상품 선택
+                                        </h3>
+                                        {promoQuery.isLoading ? (
+                                            <div className='space-y-2'>
+                                                <Skeleton className='h-16 w-full' />
+                                                <Skeleton className='h-16 w-full' />
+                                            </div>
+                                        ) : promoQuery.data?.data?.length === 0 ? (
+                                            <div className='py-6 text-center text-sm text-gray-500'>
+                                                상품이 없습니다.
+                                            </div>
+                                        ) : (
+                                            <div className='flex flex-col gap-2 max-h-44 overflow-auto'>
+                                                {promoQuery.data?.data?.map((it) => (
+                                                    <div
+                                                        key={it.auctionId}
+                                                        // ✅ [수정] onClick 핸들러와 선택 스타일 추가
+                                                        onClick={() => handlePromoSelect(it)}
+                                                        className={`flex items-center gap-3 p-2 border rounded-md cursor-pointer transition-colors ${
+                                                            selectedPromo?.auctionId ===
+                                                            it.auctionId
+                                                                ? 'bg-orange-100 border-orange-300' // 선택됨
+                                                                : 'hover:bg-gray-50' // 호버
+                                                        }`}
+                                                    >
+                                                        <img
+                                                            src={it.thumbnail}
+                                                            alt={it.auctionTitle}
+                                                            className='w-16 h-16 object-cover rounded'
+                                                        />
+                                                        <div className='flex-1'>
+                                                            <div
+                                                                className={`text-sm ${
+                                                                    selectedPromo?.auctionId ===
+                                                                    it.auctionId
+                                                                        ? 'font-semibold text-orange-800' // 선택됨
+                                                                        : 'font-medium'
+                                                                }`}
+                                                            >
+                                                                {it.auctionTitle}
+                                                            </div>
+                                                            <div className='text-xs text-gray-500'>
+                                                                {new Date(
+                                                                    it.startTime,
+                                                                ).toLocaleString()}{' '}
+                                                                -{' '}
+                                                                {new Date(
+                                                                    it.endTime,
+                                                                ).toLocaleString()}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </CollapsibleContent>
+                            </Collapsible>
+                            {/* ▲▲▲ Collapsible 부분 수정 ▲▲▲ */}
+
                             <button
                                 type='button'
                                 className='inline-flex items-center gap-2 px-3 py-1 rounded-md text-uprimary hover:bg-uprimary/10 transition'
@@ -281,26 +372,6 @@ export const FeedModal = ({ onClose }: ModalProps) => {
                     </button>
                 </div>
             </div>
-
-            {/* 내 상품 홍보 다이얼로그 */}
-            <Dialog open={isPromoOpen} onOpenChange={setPromoOpen}>
-                <DialogContent className='sm:max-w-lg w-[90vw]'>
-                    <DialogHeader>
-                        <DialogTitle>내 상품 홍보</DialogTitle>
-                        <DialogDescription>테스트 데이터 로딩 예시입니다.</DialogDescription>
-                    </DialogHeader>
-
-                    {renderPromoBody()}
-
-                    <DialogFooter className='mt-4'>
-                        <DialogClose asChild>
-                            <button className='px-4 py-2 rounded-md border hover:bg-gray-50'>
-                                닫기
-                            </button>
-                        </DialogClose>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 };
