@@ -213,7 +213,7 @@ const FeedList = () => {
 
                         {/* 본문 */}
                         <div onClick={() => navigate(`/FeedInfo/${feedId}`)}>
-                            <div className='text-gray-800 leading-relaxed mb-4 whitespace-pre-line'>
+                            <div className='text-gray-800 leading-relaxed mb-4 whitespace-pre-line line-clamp-10'>
                                 {v.contents}
                             </div>
                             {v.images.length > 0 && (
