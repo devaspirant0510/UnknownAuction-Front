@@ -46,6 +46,8 @@ const ShopPage = React.lazy(() => import('@pages/shop/ShopPage.tsx'));
 const DMPage = React.lazy(() => import('@pages/dm/DMPage.tsx'));
 const NotFoundPage = React.lazy(() => import('@pages/common/NotFoundPage.tsx'));
 
+const NotificationListPage = React.lazy(() => import('@/pages/notification/NotificationListPage.tsx'));
+
 const ServerMaintenancePage = React.lazy(() => import('@pages/info/ServerMaintenancePage.tsx'));
 
 function App() {
@@ -149,6 +151,7 @@ function App() {
                         <Route path={'/terms'} element={<TermPage />} />
                         <Route path={'/privacy'} element={<PrivacyPage />} />
                         <Route path='/profile/interests-view' element={<InterestsViewPage />} />
+                        <Route path='/notifications' element={<NotificationListPage />} />
                     </Routes>
                     <FloatingMenu />
                     <ToastContainer hideProgressBar={true} autoClose={2000} />

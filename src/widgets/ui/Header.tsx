@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { Link, useNavigate } from 'react-router';
@@ -17,6 +17,8 @@ import { axiosClient } from '@shared/lib/axiosClient.ts';
 import { Button } from '@shared/components/ui/button.tsx';
 import UserProfile from '@/features/user/ui/UserProfile.tsx';
 import { BellIcon, SearchIcon } from 'lucide-react';
+import NotificationPopup from '@/widgets/notification/NotificationPopup.tsx';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 type Props = {
     className?: string;
@@ -27,7 +29,33 @@ const Header: FC<Props> = ({ className }) => {
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
     const { userAuth, setAccessToken, setAuthUser } = useAuthStore();
     const navigate = useNavigate();
-    // TODO : 리렌더링 이슈
+    const queryClient = useQueryClient();
+
+    // 읽지 않은 알림 개수 조회
+    const { data: unreadCount = 0, refetch: refetchUnreadCount } = useQuery({
+        queryKey: ['notifications', 'unread-count'],
+        queryFn: async () => {
+            if (!userAuth) return 0;
+            try {
+                const response = await axiosClient.get('/api/v1/notifications/unread-count');
+                // [수정] API가 숫자를 바로 반환하므로 response.data를 사용
+                return response.data || 0;
+            } catch (error) {
+                console.error('읽지 않은 알림 개수 조회 실패:', error);
+                return 0;
+            }
+        },
+        enabled: !!userAuth, // userAuth가 있을 때만 조회
+        refetchInterval: 30000, // 30초마다 갱신
+    });
+
+    // 알림 읽음 처리 후 배지 업데이트
+    const handleNotificationRead = () => {
+        // queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
+        // refetchUnreadCount() 보다 invalidate가 권장됩니다.
+        // unread-count 쿼리를 무효화하여 react-query가 자동으로 refetch하도록 합니다.
+        queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
+    };
 
     const handleSearch = () => {
         if (query.trim() !== '') {
@@ -188,13 +216,21 @@ const Header: FC<Props> = ({ className }) => {
                             <Link to='/shop'>
                                 <img src='/img/point.svg' alt='cart' className='h-5' />
                             </Link>
-                            <Link to='/mypage'>
-                                <img
-                                    src='/img/notification.svg'
-                                    alt='notification'
-                                    className='h-5'
+                            {/* NotificationPopup으로 교체 */}
+                            {userAuth ? (
+                                <NotificationPopup
+                                    unreadCount={unreadCount}
+                                    onMarkAsRead={handleNotificationRead}
                                 />
-                            </Link>
+                            ) : (
+                                <Link to='/login'>
+                                    <img
+                                        src='/img/notification.svg'
+                                        alt='notification'
+                                        className='h-5'
+                                    />
+                                </Link>
+                            )}
                             <Link to='/Profile'>
                                 <img src='/img/user.svg' alt='user' className='h-5' />
                             </Link>
@@ -212,7 +248,16 @@ const Header: FC<Props> = ({ className }) => {
                 {/* 오른쪽 아이콘들 */}
                 <div className='flex items-center gap-2'>
                     <SearchIcon className={'text-usecondary'} size={30} />
-                    <BellIcon className={'text-usecondary'} fill={'var(--usecondary)'} size={30} />
+                    {userAuth ? (
+                        <NotificationPopup
+                            unreadCount={unreadCount}
+                            onMarkAsRead={handleNotificationRead}
+                        />
+                    ) : (
+                        <Link to='/login'>
+                            <BellIcon className={'text-usecondary'} size={30} />
+                        </Link>
+                    )}
                 </div>
             </div>
         </div>
