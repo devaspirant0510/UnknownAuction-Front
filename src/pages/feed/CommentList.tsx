@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getTime } from '@pages/feed/getTime.ts';
 import CommentReplyInput from '@pages/feed/CommentReplyInput.tsx';
-import { axiosClient, getServerURL } from '@shared/lib';
+import { axiosClient, getServerURL, httpFetcher } from '@shared/lib';
 
 interface User {
     nickname: string;
@@ -23,7 +23,7 @@ const fetchComments = async (feedId: number): Promise<Comment[]> => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-            }
+            },
         );
         return response.data.data || [];
     } catch (error) {
@@ -40,7 +40,7 @@ const fetchReplies = async (commentId: number): Promise<Comment[]> => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-            }
+            },
         );
         return response.data.data || [];
     } catch (error) {
@@ -50,12 +50,9 @@ const fetchReplies = async (commentId: number): Promise<Comment[]> => {
 };
 
 const CommentList = ({ feedId }: { feedId: number }) => {
-    const {
-        data: comments,
-        isLoading,
-    } = useQuery({
-        queryKey: ['comments', feedId],
-        queryFn: () => fetchComments(feedId),
+    const { data: comments, isLoading } = useQuery({
+        queryKey: ['api', 'v1', 'feed', 'comment', feedId, 'root'],
+        queryFn: httpFetcher,
         enabled: !!feedId,
     });
 
@@ -118,9 +115,12 @@ const CommentList = ({ feedId }: { feedId: number }) => {
 
     return (
         <div className='mt-4 space-y-3'>
-            {comments && comments.length > 0 ? (
-                comments.map((comment) => (
-                    <div key={comment.id} className='p-3 border border-gray-200 rounded-lg bg-gray-50'>
+            {comments && comments.data.length > 0 ? (
+                comments.data.map((comment) => (
+                    <div
+                        key={comment.id}
+                        className='p-3 border border-gray-200 rounded-lg bg-gray-50'
+                    >
                         <div className='text-sm font-semibold text-gray-800'>
                             {comment.user?.nickname || '익명'}
                         </div>

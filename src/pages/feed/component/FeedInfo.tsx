@@ -188,8 +188,7 @@ const FeedInfo = () => {
                     </div>
 
                     <div>
-                        <div className='border-t border-gray-200'></div>
-                        <div className='py-5'>{v.feed.contents}</div>
+                        <div className='py-5  whitespace-pre-line'>{v.feed.contents}</div>
                         {v.images.length > 0 && (
                             <div className='flex flex-col gap-3 items-center my-3'>
                                 {v.images.map((img, idx) => (

@@ -1,7 +1,7 @@
 // components/CommentInput.tsx
 import { useState } from 'react';
 import Cookies from 'js-cookie';
-import { axiosClient, getServerURL } from '@shared/lib';
+import { axiosClient, getServerURL, toastSuccess } from '@shared/lib';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 
@@ -39,7 +39,10 @@ const CommentInput = ({ feedId, onCommentPosted }: CommentInputProps) => {
             );
 
             setContents('');
-            toast('댓글이 등록되었습니다.');
+            toastSuccess('댓글이 등록되었습니다.');
+            await queryClient.refetchQueries({
+                queryKey: ['api', 'v1', 'feed', 'comment', feedId, 'root'],
+            });
             onCommentPosted?.();
         } catch (err: any) {
             console.error('댓글 등록 에러:', err);
