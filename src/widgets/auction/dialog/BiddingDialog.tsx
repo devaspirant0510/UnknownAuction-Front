@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -16,7 +16,7 @@ import { Button } from '@shared/components/ui/button.tsx';
 import useInput from '@shared/hooks/useInput.ts';
 import { FetchMyProfile } from '@/features/user/ui';
 import FetchLastBidPrice from '@/features/auction/ui/FetchLastBidPrice';
-import { axiosClient } from '@shared/lib';
+import { axiosClient, toastError } from '@shared/lib';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@shared/components/ui';
 
@@ -47,7 +47,6 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                     data?.data?.lastBiddingLog?.price ?? data?.data?.auction?.startPrice ?? 0;
                 const lastPrice =
                     typeof lastPriceArg === 'number' ? lastPriceArg : lastPriceFromData;
-
                 const paymentAmount = lastPrice > 0 ? inputValue - lastPrice : inputValue;
 
                 const paymentResult = await axiosClient.post('/api/v1/auction/payment', {
@@ -78,7 +77,6 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
             } catch (e) {
                 console.error(e);
             }
-
             setOpen(false);
             setValue('');
         },
@@ -123,9 +121,11 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
             const bidUnit = data?.data?.auction?.bidUnit ?? 1;
             const currentValue = value ? Number(value) : 0;
             const addAmount = bidUnit * multiplier;
+
             if (currentValue + addAmount < 0) {
                 return;
             }
+
             setValue(String(currentValue + addAmount));
         },
         [data, value, setValue],
@@ -161,7 +161,17 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
     const startPrice = data?.data?.auction?.startPrice ?? 0;
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog
+            open={open}
+            onOpenChange={(nextOpen) => {
+                // 다이얼로그 열릴 때 검사
+                if (nextOpen && data?.data?.auction.user.id === userId) {
+                    toastError('판매자는 경매에 참여할 수 없습니다.');
+                    return; // 열지 않음
+                }
+                setOpen(nextOpen);
+            }}
+        >
             <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent className='max-w-md w-full rounded-2xl p-0 overflow-hidden'>
                 <DialogHeader className='bg-[#FFF6F2] px-6 pt-6 pb-2 border-b'>
@@ -194,32 +204,28 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                         const point = user.point ?? 0;
                                         const inputValue = value ? Number(value) : 0;
                                         const lastPrice = lastPriceFromApi ?? 0;
-
                                         const paymentAmount =
                                             lastPrice > 0
                                                 ? Math.max(0, inputValue - lastPrice)
                                                 : inputValue;
-
                                         const minBidPrice = isBlind
-                                            ? 0
+                                            ? startPrice
                                             : Math.max(auctionCurrentPrice, lastPrice);
 
                                         // 입찰단위 유효성 검사 (시작가격 기준)
-                                        const isValidBidUnit = isBlind
-                                            ? true
-                                            : inputValue > 0 &&
-                                              (inputValue - startPrice) % bidUnit === 0;
+                                        const isValidBidUnit =
+                                            inputValue > 0 &&
+                                            (inputValue - startPrice) % bidUnit === 0;
 
                                         const isOver = paymentAmount > point;
-                                        const isTooLow = isBlind
-                                            ? false
-                                            : inputValue <= minBidPrice;
+                                        const isTooLow = inputValue <= minBidPrice;
                                         const isInvalid =
                                             !value ||
                                             inputValue < 1 ||
                                             isOver ||
                                             isTooLow ||
                                             !isValidBidUnit;
+
                                         const willRemain = point - paymentAmount;
 
                                         return (
@@ -257,7 +263,13 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                                                 </div>
                                                                 <div className='text-xs text-purple-700'>
                                                                     현재 가격이 공개되지 않습니다.
-                                                                    원하는 금액을 입찰해주세요.
+                                                                    시작가{' '}
+                                                                    {startPrice.toLocaleString()}P
+                                                                    이상으로 입찰해주세요.
+                                                                </div>
+                                                                <div className='mt-1 text-xs text-purple-600'>
+                                                                    입찰 단위:{' '}
+                                                                    {bidUnit.toLocaleString()}P
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -313,7 +325,7 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                                         onChange={onChange}
                                                         placeholder={
                                                             isBlind
-                                                                ? '입찰할 금액을 입력하세요'
+                                                                ? `${startPrice.toLocaleString()}P 이상 입력`
                                                                 : `${minBidPrice + bidUnit} 이상 입력`
                                                         }
                                                         className='w-full text-lg px-4 py-3 border-2 border-[#FFD1BE] focus:border-[#FF7A00] rounded-lg shadow-sm focus:ring-2 focus:ring-[#FF7A00]/20'
@@ -321,7 +333,6 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                                 </div>
 
                                                 {/*빠른 입찰 금액 증가 칩 */}
-
                                                 <div className='flex gap-2 mb-4 justify-between'>
                                                     {/* +1 단위 */}
                                                     <button
@@ -331,7 +342,6 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                                     >
                                                         +{bidUnit.toLocaleString()}P
                                                     </button>
-
                                                     {/* +5 단위 */}
                                                     <button
                                                         type='button'
@@ -340,7 +350,6 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                                     >
                                                         +{(bidUnit * 5).toLocaleString()}P
                                                     </button>
-
                                                     {/* +10 단위 */}
                                                     <button
                                                         type='button'
@@ -349,7 +358,6 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                                     >
                                                         +{(bidUnit * 10).toLocaleString()}P
                                                     </button>
-
                                                     {/* -1 단위 */}
                                                     <button
                                                         type='button'
@@ -400,7 +408,7 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                                 {/* 결제 정보 표시 */}
                                                 {value &&
                                                     !isOver &&
-                                                    (!isTooLow || isBlind) &&
+                                                    !isTooLow &&
                                                     inputValue > 0 &&
                                                     isValidBidUnit && (
                                                         <div className='bg-green-50 border border-green-200 rounded-xl p-4 mb-3'>
@@ -454,31 +462,27 @@ const BiddingDialog: FC<Props> = ({ client, children }) => {
                                                     )}
 
                                                 {/* 에러 메시지 */}
-                                                {!isBlind && isTooLow && value && (
+                                                {isTooLow && value && (
                                                     <div className='text-red-500 text-sm mb-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
-                                                        ⚠️ {minBidPrice.toLocaleString()}P보다 높은
-                                                        금액을 입력해주세요.
+                                                        ⚠️{' '}
+                                                        {isBlind
+                                                            ? `시작가 ${startPrice.toLocaleString()}P 이상 입력해주세요.`
+                                                            : `${minBidPrice.toLocaleString()}P보다 높은 금액을 입력해주세요.`}
                                                     </div>
                                                 )}
-
-                                                {!isBlind &&
-                                                    value &&
-                                                    !isValidBidUnit &&
-                                                    inputValue > 0 && (
-                                                        <div className='text-red-500 text-sm mb-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
-                                                            ⚠️ 입찰 금액은 시작가(
-                                                            {startPrice.toLocaleString()}P) 기준으로{' '}
-                                                            {bidUnit.toLocaleString()}P 단위로
-                                                            입찰해야 합니다.
-                                                        </div>
-                                                    )}
-
+                                                {value && !isValidBidUnit && inputValue > 0 && (
+                                                    <div className='text-red-500 text-sm mb-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
+                                                        ⚠️ 입찰 금액은 시작가(
+                                                        {startPrice.toLocaleString()}P) 기준으로{' '}
+                                                        {bidUnit.toLocaleString()}P 단위로 입찰해야
+                                                        합니다.
+                                                    </div>
+                                                )}
                                                 {point < 1 && (
                                                     <div className='text-red-500 text-sm mb-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
                                                         ⚠️ 포인트가 부족하여 입찰할 수 없습니다.
                                                     </div>
                                                 )}
-
                                                 {isOver && (
                                                     <div className='text-red-500 text-sm mb-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
                                                         ⚠️ 보유 포인트를 초과할 수 없습니다. (사용

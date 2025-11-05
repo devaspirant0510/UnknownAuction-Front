@@ -6,7 +6,7 @@ import UserProfile from '@/features/user/ui/UserProfile.tsx';
 import SellerCard from '@widgets/user/SellerCard.tsx';
 import { Button } from '@shared/components/ui/button.tsx';
 import { Link, useNavigate } from 'react-router';
-import { axiosClient, DateUtil } from '@shared/lib';
+import { axiosClient, DateUtil, toastError } from '@shared/lib';
 import { useCookies } from 'react-cookie';
 import Cookies from 'js-cookie';
 import { ChartLine } from 'lucide-react';
@@ -95,6 +95,24 @@ const AuctionInfo: FC<Props> = ({ id, type }) => {
             if (interval) clearInterval(interval);
         };
     }, [data]);
+    const handleBidHistory = (endTimeData: string) => {
+        if (type === 'live') {
+            navigate(`/auction/live/${id}/bid-history`);
+            return;
+        }
+
+        if (type === 'blind') {
+            const endTime = new Date(endTimeData);
+            const now = new Date();
+
+            if (endTime > now) {
+                toastError('블라인드 경매는 종료 후에만 볼 수 있어요!');
+                return;
+            }
+
+            navigate(`/auction/live/${id}/bid-history`);
+        }
+    };
     if (isLoading) {
         return <>loading</>;
     }
@@ -119,7 +137,7 @@ const AuctionInfo: FC<Props> = ({ id, type }) => {
                 </div>
                 <div className={'mt-4 text-2xl font-bold flex justify-between'}>
                     <div>{data.data.auction.goods.title}</div>
-                    <Button onClick={() => navigate(`/auction/live/${id}/bid-history`)}>
+                    <Button onClick={() => handleBidHistory(data?.data?.auction.endTime ?? '')}>
                         <ChartLine />
                         거래 내역 상세보기
                     </Button>

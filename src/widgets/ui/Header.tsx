@@ -66,11 +66,8 @@ const Header: FC<Props> = ({ className }) => {
 
     const handleLogout = async () => {
         try {
-            console.log('aa');
-            await axiosClient.post('/auth/logout');
-            console.log('bb');
-            console.log('naviaget login ');
             navigate('/login');
+            await axiosClient.post('/auth/logout');
             setAccessToken(null);
             setAuthUser(null);
             setLogoutDialogOpen(false);
