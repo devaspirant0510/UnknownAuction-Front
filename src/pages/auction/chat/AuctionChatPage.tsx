@@ -33,7 +33,9 @@ const AuctionChatPage = () => {
     return (
         <div>
             <MainLayout>{}</MainLayout>
-            <AuctionChatHeader auctionId={id} type={'live'} />
+            <BaseLayout>
+                <AuctionChatHeader auctionId={id} type={'live'} />
+            </BaseLayout>
             <BaseLayout className={'bg-[#FAFAFA] pt-8'}>
                 <StompClient auctionId={id}>
                     {(client, auctionId) => {
