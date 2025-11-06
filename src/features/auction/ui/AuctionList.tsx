@@ -10,6 +10,8 @@ import {
     Clock1Icon,
     Clock3Icon,
     ExpandIcon,
+    PackageXIcon,
+    PlusCircleIcon,
 } from 'lucide-react';
 import { getServerURL, DateUtil } from '@shared/lib';
 import { Spinner } from '@shared/components/ui/spinner.tsx';
@@ -90,7 +92,20 @@ const AuctionList: FC<Props> = ({ type }) => {
             return [];
         }) ?? [];
 
-    if (allAuctions.length === 0) return <>데이터 없음</>;
+    if (allAuctions.length === 0) {
+        return (
+            <div className='flex flex-col items-center justify-center h-80 text-gray-500'>
+                <PackageXIcon size={64} className='mb-4 text-gray-400' />
+                <p className='text-lg font-semibold mb-3'>현재 등록된 경매가 없어요 🫥</p>
+                <Button
+                    className='flex items-center gap-2 rounded-full bg-uprimary text-white px-6 py-2 hover:opacity-90 transition-all'
+                    onClick={() => navigate('/auction/productUpload')}
+                >
+                    <PlusCircleIcon size={20} />내 상품 올리기
+                </Button>
+            </div>
+        );
+    }
 
     return (
         <>

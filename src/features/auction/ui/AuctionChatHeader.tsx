@@ -21,7 +21,7 @@ const AuctionChatHeader: FC<Props> = ({ auctionId, type }) => {
         return <>no data</>;
     }
     return (
-        <BaseLayout>
+        <>
             <div className={'flex gap-3 mb-6 '}>
                 <BackButton className={'absolute left-8'} />
 
@@ -55,7 +55,7 @@ const AuctionChatHeader: FC<Props> = ({ auctionId, type }) => {
                     </div>
                 </div>
             </div>
-        </BaseLayout>
+        </>
     );
 };
 
