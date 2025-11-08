@@ -21,13 +21,16 @@ type TodoItem = {
 const HomePage = () => {
     return (
         <AppLayout>
+            <img src={'img/banner.png'} className={'-mt-52'} />
             <BaseLayout>
                 <HotAuctionList />
             </BaseLayout>
-            <img src={'/img/eventbanner.png'} />
+            <div className={'h-32'}></div>
             <BaseLayout>
                 <HotFeedList />
             </BaseLayout>
+            <div className={'h-32'}></div>
+            <img src={'/img/eventbanner.png'} />
         </AppLayout>
     );
 };

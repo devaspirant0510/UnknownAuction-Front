@@ -46,6 +46,7 @@ export type AccountDto = {
 export type UserStats = {
     nickname: string;
     sellCount: number;
+    wishListCount: number;
     biddingCount: number;
     followerCount: number;
     reviewCount: number | null;

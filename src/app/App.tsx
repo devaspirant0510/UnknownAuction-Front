@@ -7,11 +7,16 @@ import PointPage from '@pages/profile/PointPage.tsx';
 import { useAuthStore } from '@shared/store/AuthStore.ts';
 import { axiosClient } from '@shared/lib';
 import { ToastContainer, toast } from 'react-toastify';
-import SalesViewPage from "@/features/profile/ui/SalesViewPage";
-import BuysViewPage from "@/features/profile/ui/BuysViewPage";
-import PublicProfilePage from "@/features/profile/ui/PublicProfilePage";
+import SalesViewPage from '@/features/profile/ui/SalesViewPage';
+import BuysViewPage from '@/features/profile/ui/BuysViewPage';
+import PublicProfilePage from '@/features/profile/ui/PublicProfilePage';
 import { messaging } from '@/firebase';
 import { getToken, onMessage } from 'firebase/messaging';
+import FloatingMenu from '@/widgets/ui/FloatingMenu';
+import CompanyPage from '@pages/info/CompanyPage.tsx';
+import TermPage from '@pages/info/TermPage.tsx';
+import PrivacyPage from '@pages/info/PrivacyPage.tsx';
+import InterestsViewPage from "@/features/profile/ui/InterestsViewPage";
 
 const HomePage = React.lazy(() => import('@pages/home/HomePage.tsx'));
 const FeedPage = React.lazy(() => import('@pages/feed/FeedPage.tsx'));
@@ -41,10 +46,15 @@ const ShopPage = React.lazy(() => import('@pages/shop/ShopPage.tsx'));
 const DMPage = React.lazy(() => import('@pages/dm/DMPage.tsx'));
 const NotFoundPage = React.lazy(() => import('@pages/common/NotFoundPage.tsx'));
 
+const NotificationListPage = React.lazy(() => import('@/pages/notification/NotificationListPage.tsx'));
+
+const ServerMaintenancePage = React.lazy(() => import('@pages/info/ServerMaintenancePage.tsx'));
+
 function App() {
     const { setAccessToken } = useAuthStore();
     const [loading, setLoading] = useState(true);
     const [isMessageListenerAdded, setIsMessageListenerAdded] = useState(false);
+    const [isInspection, setInspection] = useState(false);
 
     useEffect(() => {
         axiosClient
@@ -60,14 +70,11 @@ function App() {
                 if (!isMessageListenerAdded) {
                     onMessage(messaging, (payload) => {
                         console.log('Foreground message:', payload.notification);
-                        toast.info(
-                            payload.notification?.body || 'New notification',
-                            {
-                                position: 'top-right',
-                                autoClose: 3000,
-                                hideProgressBar: true,
-                            }
-                        );
+                        toast.info(payload.notification?.body || 'New notification', {
+                            position: 'top-right',
+                            autoClose: 3000,
+                            hideProgressBar: true,
+                        });
                     });
                     setIsMessageListenerAdded(true);
                 }
@@ -94,12 +101,19 @@ function App() {
                     }
                 });
             })
-            .catch(() => {})
+            .catch((e) => {
+                if (e.message === 'Network Error') {
+                    setInspection(true);
+                }
+            })
             .finally(() => setLoading(false));
     }, []);
 
     if (loading) {
         return <>loading</>;
+    }
+    if (isInspection) {
+        return <ServerMaintenancePage />;
     }
 
     return (
@@ -117,7 +131,7 @@ function App() {
                         <Route path='/profile' element={<ProfilePage />} />
                         <Route path='/profile/point' element={<PointPage />} />
                         <Route path='/profile/sales-view' element={<SalesViewPage />} />
-                        <Route path="/users/:userId" element={<PublicProfilePage />} />
+                        <Route path='/users/:userId' element={<PublicProfilePage />} />
                         <Route path='/profile/buys-view' element={<BuysViewPage />} />
                         <Route path='/auction/productUpload' element={<ProductUploadPage />} />
                         <Route path='/auction/chat/:id' element={<AuctionChatPage />} />
@@ -133,7 +147,13 @@ function App() {
                         <Route path='/shop' element={<ShopPage />} />
                         <Route path='/dm' element={<DMPage />} />
                         <Route path='*' element={<NotFoundPage />} />
+                        <Route path={'/company'} element={<CompanyPage />} />
+                        <Route path={'/terms'} element={<TermPage />} />
+                        <Route path={'/privacy'} element={<PrivacyPage />} />
+                        <Route path='/profile/interests-view' element={<InterestsViewPage />} />
+                        <Route path='/notifications' element={<NotificationListPage />} />
                     </Routes>
+                    <FloatingMenu />
                     <ToastContainer hideProgressBar={true} autoClose={2000} />
                 </Suspense>
             </BrowserRouter>

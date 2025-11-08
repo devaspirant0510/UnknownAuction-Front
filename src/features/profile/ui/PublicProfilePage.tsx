@@ -3,37 +3,79 @@ import { MainLayout } from '@shared/layout';
 import { BackButton } from '@shared/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs.tsx';
 
-// 훅 임포트
+// 훅
 import { useQueryGetUserById } from '../lib/useQueryGetUserById.ts';
 import { useQueryGetUserFeeds } from '../lib/useQueryGetUserFeeds.ts';
-import { useAuthUser } from '@shared/hooks/useAuthUser.tsx'; // 로그인 유저 정보 훅
+import { useQueryGetUserSales } from '../lib/useQueryGetUserSales.ts';
+import { useQueryGetUserPurchases } from '../lib/useQueryGetUserPurchases.ts'; // [추가]
+import { useAuthUser } from '@shared/hooks/useAuthUser.tsx';
+import { AuctionData } from '@entities/auction/model';
 
-// 재사용 컴포넌트
+// 컴포넌트
 import { PublicProfileHeader } from '../ui/PublicProfileHeader.tsx';
 import MyFeed from '@/features/profile/ui/MyFeed.tsx';
+import MySalesList from '@/features/profile/ui/MySalesList.tsx';
+import MyBuysList from '@/features/profile/ui/MyBuysList.tsx'; // [추가]
 
 const PublicProfilePage = () => {
     const { userId } = useParams<{ userId: string }>();
-
-    // 현재 로그인한 유저의 ID를 가져옵니다.
     const [_, authUserId] = useAuthUser();
 
-    // 1. 유저 정보 API 호출
+    // 1. 유저 정보
     const { data: userData, isLoading: isUserLoading, isError: isUserError } =
         useQueryGetUserById(userId);
 
-    // 2. 유저 피드 API 호출
+    // 2. 유저 피드
     const { data: feedsData, isLoading: isFeedsLoading, isError: isFeedsError } =
         useQueryGetUserFeeds(userId);
 
-    const isLoading = isUserLoading || isFeedsLoading;
-    const isError = isUserError || isFeedsError;
+    // 3. 유저 판매상품
+    const { data: salesData, isLoading: isSalesLoading, isError: isSalesError } =
+        useQueryGetUserSales(userId);
+
+    // 4. [추가] 유저 구매상품
+    const { data: purchasesData, isLoading: isPurchasesLoading, isError: isPurchasesError } =
+        useQueryGetUserPurchases(userId);
+
+    const isLoading = isUserLoading || isFeedsLoading || isSalesLoading || isPurchasesLoading; // [수정]
+    const isError = isUserError || isFeedsError || isSalesError || isPurchasesError; // [수정]
 
     const feeds = feedsData?.data || [];
+    const sales = salesData?.data || [];
+    const purchases = purchasesData?.data || []; // [추가]
     const userProfile = userData?.data;
 
-    // 현재 보고 있는 프로필이 '내 프로필'인지 확인합니다.
     const isMe = Number(authUserId) === Number(userId);
+
+    // 판매 목록 헬퍼
+    const renderSalesList = (sales: AuctionData[], emptyMessage: string) => {
+        if (sales.length === 0) {
+            return <div className='py-20 text-center text-gray-500'>{emptyMessage}</div>;
+        }
+        return (
+            <div className='grid grid-cols-4 gap-4'>
+                {sales.map((sale) => (
+                    <MySalesList key={sale.auction.id} item={sale} />
+                ))}
+            </div>
+        );
+    };
+
+    // [추가] 구매 목록 헬퍼
+    const renderPurchasesList = (purchases: AuctionData[], emptyMessage: string) => {
+        if (purchases.length === 0) {
+            return <div className='py-20 text-center text-gray-500'>{emptyMessage}</div>;
+        }
+        // MyBuysList.tsx 재사용
+        return (
+            <div className='grid grid-cols-4 gap-4'>
+                {purchases.map((purchase) => (
+                    <MyBuysList key={purchase.auction.id} item={purchase} />
+                ))}
+            </div>
+        );
+    };
+
 
     const renderContent = () => {
         if (isLoading) {
@@ -43,22 +85,30 @@ const PublicProfilePage = () => {
             return <div className='py-20 text-center text-red-500'>프로필을 불러오는데 실패했습니다.</div>;
         }
 
+        const salesCount = sales.length;
+        const purchasesCount = purchases.length; // [추가]
+
         return (
             <>
-                {/* 1. 프로필 헤더 (isMe 프롭스 전달) */}
                 <PublicProfileHeader userData={userProfile} isMe={isMe} />
 
                 {/* 2. 콘텐츠 탭 */}
                 <Tabs defaultValue='feeds'>
-                    <TabsList className='grid w-full grid-cols-2 mb-6'>
+                    {/* [수정] grid-cols-3으로 변경 */}
+                    <TabsList className='grid w-full grid-cols-3 mb-6'>
                         <TabsTrigger value='feeds'>
                             게시물 ({userProfile.feedCount})
                         </TabsTrigger>
-                        <TabsTrigger value='sales' disabled>
-                            판매 상품
+                        <TabsTrigger value='sales'>
+                            판매 상품 ({salesCount})
+                        </TabsTrigger>
+                        {/* [추가] 구매 상품 탭 */}
+                        <TabsTrigger value='purchases'>
+                            구매 상품 ({purchasesCount})
                         </TabsTrigger>
                     </TabsList>
 
+                    {/* 게시물 탭 */}
                     <TabsContent value='feeds' className='mt-0'>
                         {feeds.length === 0 ? (
                             <div className='py-20 text-center text-gray-500'>게시물이 없습니다.</div>
@@ -68,6 +118,28 @@ const PublicProfilePage = () => {
                                     <MyFeed key={feed.feed.id} feedData={feed} />
                                 ))}
                             </div>
+                        )}
+                    </TabsContent>
+
+                    {/* 판매 상품 탭 */}
+                    <TabsContent value='sales' className='mt-0'>
+                        {isSalesLoading ? (
+                            <div className='py-20 text-center text-gray-500'>판매 상품을 불러오는 중...</div>
+                        ) : isSalesError ? (
+                            <div className='py-20 text-center text-red-500'>판매 상품을 불러오는데 실패했습니다.</div>
+                        ) : (
+                            renderSalesList(sales, '판매중인 상품이 없습니다.')
+                        )}
+                    </TabsContent>
+
+                    {/* [추가] 구매 상품 탭 */}
+                    <TabsContent value='purchases' className='mt-0'>
+                        {isPurchasesLoading ? (
+                            <div className='py-20 text-center text-gray-500'>구매 상품을 불러오는 중...</div>
+                        ) : isPurchasesError ? (
+                            <div className='py-20 text-center text-red-500'>구매 상품을 불러오는데 실패했습니다.</div>
+                        ) : (
+                            renderPurchasesList(purchases, '구매(낙찰)한 상품이 없습니다.')
                         )}
                     </TabsContent>
                 </Tabs>

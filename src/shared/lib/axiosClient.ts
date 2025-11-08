@@ -42,13 +42,9 @@ axiosClient.interceptors.response.use(
                 return axiosClient(originalRequest);
             } catch (refreshError) {
                 console.error('리프레시 토큰도 만료됨 👉 로그인 페이지로 이동!');
-                console.log(refreshError.response.data.error.detail);
-                // location.href = '/login?error=loginfailed';
                 return Promise.reject(refreshError);
             }
         }
-        console.log('axiosclienterror');
-        console.log(error.response.data.error);
         return Promise.reject(error);
     },
 );

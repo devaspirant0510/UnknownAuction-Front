@@ -1,5 +1,5 @@
-import React, { FC, useCallback, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import { useInfiniteQueryGetAuction } from '@/features/auction/lib/useInfiniteQueryGetAuction';
 import { Card, CardContent } from '@shared/components/ui/card.tsx';
 import { Button } from '@shared/components/ui/button.tsx';
@@ -10,6 +10,8 @@ import {
     Clock1Icon,
     Clock3Icon,
     ExpandIcon,
+    PackageXIcon,
+    PlusCircleIcon,
 } from 'lucide-react';
 import { getServerURL, DateUtil } from '@shared/lib';
 import { Spinner } from '@shared/components/ui/spinner.tsx';
@@ -20,12 +22,21 @@ type Props = {
 };
 
 const AuctionList: FC<Props> = ({ type }) => {
+    const location = useLocation();
     const navigate = useNavigate();
+    const [currentCategory, setCategory] = useState();
     const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
-        useInfiniteQueryGetAuction(type);
+        useInfiniteQueryGetAuction(type, currentCategory);
     const loaderRef = useRef<HTMLDivElement | null>(null);
     const fetchingRef = useRef(false);
 
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const category = params.get('category'); // category 값 가져오기
+        console.log(category);
+        setCategory(category);
+        // 여기서 category 바뀌었을 때 처리
+    }, [location.search]); // sear
     useEffect(() => {
         const loader = loaderRef.current;
         if (!loader) return;
@@ -81,7 +92,20 @@ const AuctionList: FC<Props> = ({ type }) => {
             return [];
         }) ?? [];
 
-    if (allAuctions.length === 0) return <>데이터 없음</>;
+    if (allAuctions.length === 0) {
+        return (
+            <div className='flex flex-col items-center justify-center h-80 text-gray-500'>
+                <PackageXIcon size={64} className='mb-4 text-gray-400' />
+                <p className='text-lg font-semibold mb-3'>현재 등록된 경매가 없어요 🫥</p>
+                <Button
+                    className='flex items-center gap-2 rounded-full bg-uprimary text-white px-6 py-2 hover:opacity-90 transition-all'
+                    onClick={() => navigate('/auction/productUpload')}
+                >
+                    <PlusCircleIcon size={20} />내 상품 올리기
+                </Button>
+            </div>
+        );
+    }
 
     return (
         <>
@@ -112,7 +136,7 @@ const AuctionList: FC<Props> = ({ type }) => {
                             <div className='text-xl font-bold flex gap-2'>
                                 <span className='text-[#F7A17E]'>현재가</span>
                                 {type === 'blind' ? (
-                                    <>***,***p</>
+                                    <>Unknown</>
                                 ) : (
                                     <span>
                                         {v.currentPrice

@@ -7,5 +7,6 @@ export type PointHistory = {
     earnedPoint: number;
     chargeType: ChargeType;
     contents: string;
+    earnType: 'EARN' | 'USE';
     userId: User;
 };

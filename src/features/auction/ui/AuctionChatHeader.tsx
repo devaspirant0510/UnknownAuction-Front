@@ -21,7 +21,7 @@ const AuctionChatHeader: FC<Props> = ({ auctionId, type }) => {
         return <>no data</>;
     }
     return (
-        <BaseLayout>
+        <>
             <div className={'flex gap-3 mb-6 '}>
                 <BackButton className={'absolute left-8'} />
 
@@ -43,9 +43,7 @@ const AuctionChatHeader: FC<Props> = ({ auctionId, type }) => {
                                     p
                                 </span>
                             ) : (
-                                <span className={'text-[#E47547] text-2xl font-bold'}>
-                                    ***,***p
-                                </span>
+                                <span className={'text-[#E47547] text-2xl font-bold'}>Unknown</span>
                             )}
                         </div>
                         <div className={'text-[#C9A9A9] text-sm'}>
@@ -57,7 +55,7 @@ const AuctionChatHeader: FC<Props> = ({ auctionId, type }) => {
                     </div>
                 </div>
             </div>
-        </BaseLayout>
+        </>
     );
 };
 

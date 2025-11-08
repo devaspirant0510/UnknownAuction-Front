@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import { getServerURL } from '@shared/lib';
 
 type Props = {
-    src?: string;
+    src?: string | null;
     size: number;
     onClick?: (e: React.MouseEvent<HTMLImageElement>) => void;
 };

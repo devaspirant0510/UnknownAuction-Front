@@ -5,6 +5,7 @@ export enum DELIVERY_TYPE {
     PARCEL = 'PARCEL',
     NEGOTIATE = 'NEGOTIATE',
 }
+
 export type Goods = {
     title: string;
     description: string;
@@ -59,7 +60,8 @@ export type Auction = {
     user: Account;
     category: Category;
     viewCount: number;
-    auctionType: 'live';
+    // auctionType: 'live';
+    auctionType: 'LIVE' | 'BLIND';
     startPrice: number;
     count: number;
     startTime: string;
@@ -90,6 +92,24 @@ export type ChatEntity = {
     biddingLog: BiddingLogEntity;
 };
 
+export type ChatDto = {
+    id: number;
+    contents: string;
+    createdAt: string; // ISO 날짜 문자열
+    userId: number;
+    nickname: string;
+    profileUrl: string;
+    chatType: 'MESSAGE' | 'BID_LOG'; // enum 형태로 쓸 수도 있음!
+    prevPrice?: number;
+    price?: number;
+};
+
+export type BidDailySummary = {
+    truncatedDate: string;
+    totalPrice: number;
+    count: number;
+};
+
 export interface BiddingLogEntity {
     id: number;
     bidder: Account;
@@ -98,6 +118,7 @@ export interface BiddingLogEntity {
     price: number;
     prevPrice: number;
 }
+
 export type BidLog = {
     id: number;
     bidderId: number;

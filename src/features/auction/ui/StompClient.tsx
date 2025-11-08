@@ -70,7 +70,7 @@ const StompClient: FC<Props> = ({ auctionId, children }) => {
                         // );
                     }
                     queryClient.setQueryData(
-                        ['api', 'v1', 'auction', 'chat', Number(auctionId)],
+                        ['api', 'v2', 'auction', 'chat', Number(auctionId)],
                         (prev) => {
                             return {
                                 ...prev,
@@ -89,7 +89,6 @@ const StompClient: FC<Props> = ({ auctionId, children }) => {
         return () => {
             clientdata.deactivate().then((r) => {
                 console.log('소켓 연결 해제');
-                console.log(r);
             });
         };
     }, [auctionId, accessToken]);

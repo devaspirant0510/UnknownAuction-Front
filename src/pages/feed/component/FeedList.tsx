@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { axiosClient, getServerURL, httpFetcher } from '@shared/lib';
-import { ApiResult } from '@entities/common';
+import { useEffect, useRef, useState } from 'react';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { axiosClient, getServerURL, httpFetcher, pageSegmentBuilder } from '@shared/lib';
+import { ApiResult, Page } from '@entities/common';
 import { useNavigate } from 'react-router';
 import { faComment, faExclamation, faHeart, faShareNodes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -18,147 +18,130 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from '@/shared/components/ui/dropdown-menu';
-import { MoreVertical } from 'lucide-react';
-import { Pencil, Trash2 } from 'lucide-react';
-
-interface User {
-    nickname: string;
-    profileUrl?: string;
-    id?: number; // 추가: 사용자 ID 사용 라인과 타입 일치
-}
-
-interface Feed {
-    id: number | string;
-    contents: string;
-    createdAt: string;
-    user: User;
-}
-
-interface Image {
-    url: string;
-    fileName: string;
-}
-
-export interface FeedWrapper {
-    feed: Feed;
-    images: Image[];
-    commentCount: number;
-    likeCount: number;
-    liked?: boolean; // 추가: API 응답에 존재 가능
-    isLiked?: boolean; // 추가: 기존 코드에서 참조함
-}
+import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { FeedListResponse } from '@entities/feed/model';
+import { Spinner } from '@shared/components/ui/spinner.tsx';
 
 const FeedList = () => {
     const queryClient = useQueryClient();
-    const { getUserAuth } = useAuthStore();
-
-    const { isLoading, isError, data, error } = useQuery({
-        queryKey: ['api', 'v1', 'feed', 'test-all'],
-        queryFn: httpFetcher<ApiResult<FeedWrapper[]>>,
-    });
-
+    const { userAuth } = useAuthStore();
     const navigate = useNavigate();
-    const [commentVisibleMap, setCommentVisibleMap] = useState<{ [key: number]: boolean }>({});
-    const [dynamicCommentCounts, setDynamicCommentCounts] = useState<{ [key: number]: number }>({});
-    const [likeStatusMap, setLikeStatusMap] = useState<{
-        [key: number]: { isLiked: boolean; count: number };
-    }>({});
-    const [likeLoadingMap, setLikeLoadingMap] = useState<{ [key: number]: boolean }>({});
+    const loaderRef = useRef<HTMLDivElement | null>(null);
+    const fetchingRef = useRef(false);
 
-    // 수정 모달 관련
+    const { isLoading, isError, data, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
+        useInfiniteQuery({
+            queryKey: ['api', 'v2', 'feed'],
+            queryFn: async ({ pageParam = 1 }) =>
+                httpFetcher<ApiResult<Page<FeedListResponse>>>({
+                    queryKey: ['api', 'v2', pageSegmentBuilder('feed', pageParam, 8)],
+                } as any),
+            getNextPageParam: (lastPage) =>
+                !lastPage.data?.last ? lastPage.data?.pageable.pageNumber + 2 : undefined,
+            initialPageParam: 1,
+        });
+
+    const [commentVisibleMap, setCommentVisibleMap] = useState<Record<number, boolean>>({});
+    const [dynamicCommentCounts, setDynamicCommentCounts] = useState<Record<number, number>>({});
+    const [likeStatusMap, setLikeStatusMap] = useState<
+        Record<number, { isLiked: boolean; count: number }>
+    >({});
+    const [likeLoadingMap, setLikeLoadingMap] = useState<Record<number, boolean>>({});
     const [editingFeedId, setEditingFeedId] = useState<number | null>(null);
-    const [editingFeedData, setEditingFeedData] = useState<FeedWrapper | null>(null);
-    const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+    const [editingFeedData, setEditingFeedData] = useState<FeedListResponse | null>(null);
 
     const toggleComment = (feedId: number) => {
         setCommentVisibleMap((prev) => ({ ...prev, [feedId]: !prev[feedId] }));
     };
 
+    // ✅ 자동로딩 IntersectionObserver
     useEffect(() => {
-        if (data?.data) {
-            const commentCounts: { [key: number]: number } = {};
-            const likeStatus: { [key: number]: { isLiked: boolean; count: number } } = {};
+        const loader = loaderRef.current;
+        if (!loader) return;
 
-            data.data.forEach((item) => {
-                commentCounts[Number(item.feed.id)] = item.commentCount;
-                const computedLiked = item.liked ?? item.isLiked ?? false;
-                likeStatus[Number(item.feed.id)] = {
-                    isLiked: computedLiked,
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const target = entries[0];
+                if (
+                    target.isIntersecting &&
+                    hasNextPage &&
+                    !isFetchingNextPage &&
+                    !fetchingRef.current
+                ) {
+                    fetchingRef.current = true;
+                    fetchNextPage().finally(() => {
+                        fetchingRef.current = false;
+                    });
+                }
+            },
+            { rootMargin: '100px', threshold: 0 },
+        );
+
+        observer.observe(loader);
+        return () => observer.disconnect();
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+    // ✅ 좋아요 / 댓글 카운트 초기화
+    useEffect(() => {
+        if (!data?.pages) return;
+        const commentCounts: Record<number, number> = {};
+        const likeStatus: Record<number, { isLiked: boolean; count: number }> = {};
+
+        data.pages.forEach((page) => {
+            page.data?.content.forEach((item) => {
+                commentCounts[item.id] = item.commentCount;
+                likeStatus[item.id] = {
+                    isLiked: item.liked ?? false,
                     count: item.likeCount,
                 };
             });
+        });
 
-            setDynamicCommentCounts(commentCounts);
-            setLikeStatusMap(likeStatus);
-        }
+        setDynamicCommentCounts(commentCounts);
+        setLikeStatusMap(likeStatus);
     }, [data]);
-
-    // 첫 로드 시 현재 사용자 ID 가져오기
-    useEffect(() => {
-        const userAuth = getUserAuth();
-        if (userAuth?.id) {
-            console.log('✅ Current User ID:', userAuth.id);
-            setCurrentUserId(userAuth.id);
-        } else {
-            console.log('⚠️ User Auth not found');
-        }
-    }, [getUserAuth]);
 
     const handleLikeToggle = async (feedId: number) => {
         const currentStatus = likeStatusMap[feedId];
         if (!currentStatus || likeLoadingMap[feedId]) return;
 
         setLikeLoadingMap((prev) => ({ ...prev, [feedId]: true }));
-
         try {
             await axiosClient.patch(`${getServerURL()}/api/v1/feed/${feedId}/like`);
-
-            await queryClient.refetchQueries({
-                queryKey: ['api', 'v1', 'feed', 'test-all'],
-                type: 'active',
-            });
+            await queryClient.invalidateQueries({ queryKey: ['api', 'v2', 'feed'] });
         } catch (error: any) {
-            console.error('좋아요 처리 에러:', error);
-            alert(error.response?.data?.message || '좋아요 처리 중 오류가 발생했습니다.');
+            toast.error(error.response?.data?.message || '좋아요 처리 중 오류 발생');
         } finally {
             setLikeLoadingMap((prev) => ({ ...prev, [feedId]: false }));
         }
     };
 
-    const handleEditClick = (feedData: FeedWrapper) => {
-        setEditingFeedId(Number(feedData.feed.id));
+    const handleEditClick = (feedData: FeedListResponse) => {
+        setEditingFeedId(feedData.id);
         setEditingFeedData(feedData);
-    };
-
-    const handleDeleteClick = (feedId: number) => {
-        if (window.confirm('이 글을 삭제하시겠습니까?')) {
-            handleDeleteFeed(feedId);
-        }
     };
 
     const handleDeleteFeed = async (feedId: number) => {
         try {
             await axiosClient.delete(`${getServerURL()}/api/v1/feed/${feedId}`);
             toast('글이 삭제되었습니다.');
-            queryClient.invalidateQueries({
-                queryKey: ['api', 'v1', 'feed', 'test-all'],
-            });
+            queryClient.invalidateQueries({ queryKey: ['api', 'v2', 'feed'] });
         } catch (error: any) {
-            console.error('삭제 에러:', error);
-            alert(error.response?.data?.message || '삭제 중 오류가 발생했습니다.');
+            toast.error(error.response?.data?.message || '삭제 중 오류 발생');
         }
     };
 
-    if (isLoading) return <>loading</>;
+    if (isLoading) return <>loading...</>;
     if (isError) return <>{(error as any)?.message || 'error'}</>;
-    if (!data || !data.data) return <>nodata</>;
+
+    const allFeeds = data?.pages.flatMap((page) => page.data?.content ?? []) ?? [];
 
     return (
-        <div className=' flex flex-col items-center gap-2 mt-8'>
+        <div className='flex flex-col items-center gap-2 mt-8'>
             {editingFeedId && editingFeedData && (
                 <EditModal
                     feedId={editingFeedId}
-                    initialContent={editingFeedData.feed.contents}
+                    initialContent={editingFeedData.contents}
                     initialImages={editingFeedData.images}
                     onClose={() => {
                         setEditingFeedId(null);
@@ -167,108 +150,79 @@ const FeedList = () => {
                 />
             )}
 
-            {data.data.map((v) => {
-                const feedId = Number(v.feed.id);
+            {allFeeds.map((v) => {
+                const feedId = v.id;
                 const isVisible = commentVisibleMap[feedId] ?? false;
                 const commentCount = dynamicCommentCounts[feedId] ?? v.commentCount;
-
                 const likeStatus = likeStatusMap[feedId] ?? {
-                    isLiked: v.isLiked,
+                    isLiked: v.liked,
                     count: v.likeCount,
                 };
                 const isLikeLoading = likeLoadingMap[feedId] ?? false;
-                const isAuthor =
-                    currentUserId !== null &&
-                    v.feed.user.id !== undefined &&
-                    currentUserId === v.feed.user.id;
-
-                console.log(`📝 Feed ${feedId}:`, {
-                    currentUserId,
-                    feedUserId: v.feed.user.id,
-                    isAuthor,
-                });
+                const isAuthor = userAuth?.id === v.writerId;
 
                 return (
                     <div
                         key={feedId}
-                        className='bg-white w-full rounded-xl shadow-md px-6 py-5 mt-2 '
-                        style={{ border: '1px solid #bababa80' }}
+                        className='bg-white w-full rounded-xl shadow-md px-6 py-5 mt-2 border border-gray-300'
                     >
+                        {/* 상단 작성자 */}
                         <div className='flex items-start justify-between mb-2'>
                             <div className='flex items-center'>
                                 <ProfileImage
-                                    src={v.feed.user.profileUrl}
+                                    src={v.writerProfileImageUrl}
                                     size={48}
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        // 사용자 ID가 존재하면 프로필 페이지로 이동
-                                        if (v.feed.user.id) {
-                                            navigate(`/users/${v.feed.user.id}`);
-                                        }
+                                        if (v.writerId) navigate(`/users/${v.writerId}`);
                                     }}
-                                    style={{ cursor: v.feed.user.id ? 'pointer' : 'default' }}
+                                    style={{ cursor: v.writerId ? 'pointer' : 'default' }}
                                 />
                                 <div className='ml-3'>
-                                    <div className='font-semibold'>{v.feed.user.nickname}</div>
+                                    <div className='font-semibold'>{v.writerName}</div>
                                     <div className='text-sm text-gray-400'>
-                                        {getTime(v.feed.createdAt)}
+                                        {getTime(v.createdAt)}
                                     </div>
                                 </div>
                             </div>
+
                             {isAuthor && (
-                                <div className='flex items-center'>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <button
-                                                className='p-2 rounded-md hover:bg-gray-100 transition text-gray-600'
-                                                aria-label='글 옵션'
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <MoreVertical className='w-5 h-5' />
-                                            </button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent
-                                            side='left'
-                                            align='start'
-                                            sideOffset={2}
-                                            className='min-w-[8rem]'
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <button className='p-2 rounded-md hover:bg-gray-100 text-gray-600'>
+                                            <MoreVertical className='w-5 h-5' />
+                                        </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent side='left' align='start'>
+                                        <DropdownMenuItem onClick={() => handleEditClick(v)}>
+                                            <Pencil className='w-4 h-4 mr-2' /> 수정하기
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => {
+                                                if (window.confirm('이 글을 삭제하시겠습니까?'))
+                                                    handleDeleteFeed(feedId);
+                                            }}
+                                            className='text-red-600'
                                         >
-                                            <DropdownMenuItem
-                                                className='justify-center gap-2'
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleEditClick(v);
-                                                }}
-                                            >
-                                                <Pencil className='w-4 h-4' />
-                                                <span>수정하기</span>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                className='justify-center gap-2 text-red-600 focus:text-red-700'
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteClick(feedId);
-                                                }}
-                                            >
-                                                <Trash2 className='w-4 h-4' />
-                                                <span>삭제하기</span>
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
+                                            <Trash2 className='w-4 h-4 mr-2' /> 삭제하기
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             )}
                         </div>
+
+                        {/* 본문 */}
                         <div onClick={() => navigate(`/FeedInfo/${feedId}`)}>
-                            <div className='text-gray-800 leading-relaxed mb-4 whitespace-pre-line'>
-                                {v.feed.contents}
+                            <div className='text-gray-800 leading-relaxed mb-4 whitespace-pre-line line-clamp-10'>
+                                {v.contents}
                             </div>
                             {v.images.length > 0 && (
-                                <div className='flex items-center gap-2 overflow-x-auto mb-3'>
+                                <div className='flex gap-2 overflow-x-auto mb-3'>
                                     {v.images.map((img, idx) => (
                                         <img
                                             key={idx}
-                                            src={`${img.url}`}
-                                            alt={img.fileName}
+                                            src={img.url}
+                                            alt='feed image'
                                             className='h-60 rounded-md object-cover border border-gray-200'
                                         />
                                     ))}
@@ -276,13 +230,11 @@ const FeedList = () => {
                             )}
                         </div>
 
+                        {/* 액션 */}
                         <div className='flex items-center justify-between text-gray-500 text-sm border-t pt-3'>
                             <div className='flex gap-3'>
                                 <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleLikeToggle(feedId);
-                                    }}
+                                    onClick={() => handleLikeToggle(feedId)}
                                     disabled={isLikeLoading}
                                     className={`transition ${
                                         likeStatus.isLiked
@@ -290,42 +242,39 @@ const FeedList = () => {
                                             : 'text-gray-500 hover:text-red-400'
                                     } disabled:opacity-50`}
                                 >
-                                    <FontAwesomeIcon
-                                        icon={faHeart}
-                                        style={{
-                                            color: likeStatus.isLiked ? '#ef4444' : 'inherit', // Tailwind의 red-500
-                                        }}
-                                    />{' '}
-                                    {likeStatus.count}
+                                    <FontAwesomeIcon icon={faHeart} /> {likeStatus.count}
                                 </button>
-
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleComment(feedId);
-                                    }}
-                                >
+                                <button onClick={() => toggleComment(feedId)}>
                                     <FontAwesomeIcon icon={faComment} /> {commentCount}
                                 </button>
                             </div>
                             <div className='flex gap-3'>
-                                <button onClick={(e) => e.stopPropagation()}>
-                                    <FontAwesomeIcon icon={faShareNodes} />
-                                </button>
-                                <button onClick={(e) => e.stopPropagation()}>
-                                    <FontAwesomeIcon icon={faExclamation} />
-                                </button>
+                                <FontAwesomeIcon icon={faShareNodes} />
+                                <FontAwesomeIcon icon={faExclamation} />
                             </div>
                         </div>
 
+                        {isVisible && <CommentList feedId={feedId} />}
                         <div className='mt-4'>
                             <CommentInput feedId={feedId} />
                         </div>
-
-                        {isVisible && <CommentList feedId={feedId} />}
                     </div>
                 );
             })}
+
+            <div
+                ref={(el) => (loaderRef.current = el)}
+                className='h-10 flex justify-center items-center mb-8'
+            >
+                {isFetchingNextPage && (
+                    <div className='flex justify-center mt-2'>
+                        <Spinner className='size-8' />
+                    </div>
+                )}
+                {!hasNextPage && allFeeds.length > 0 && (
+                    <span className='text-gray-400'>모든 피드를 불러왔어요 🎉</span>
+                )}
+            </div>
         </div>
     );
 };

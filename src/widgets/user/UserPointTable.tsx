@@ -1,6 +1,5 @@
 // filepath: /Users/kotlinandnode/seungho/capstone/FlashBid-Front/src/widgets/user/UserPointTable.tsx
 import React from 'react';
-import { Badge } from '@/shared/components/ui/badge';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import {
     Table,
@@ -13,26 +12,20 @@ import {
 import { Calendar } from 'lucide-react';
 
 export type PointRecord = {
-    createdAt: string;
+    createdAt: string | null;
     contents: string;
     earnedPoint: number;
-    chargeType: string; // CHARGE | GIFT | PURCHASE | etc
-};
-
-export type ChargeTypeMeta = {
-    label: string;
-    icon: React.ReactNode;
-    className: string; // badge class
+    // chargeType: string; // removed: CHARGE | GIFT | PURCHASE | etc
+    earnType: 'EARN' | 'USE';
 };
 
 type Props = {
     rows: PointRecord[];
     totalCount: number;
     formatDate: (dateString: string) => string;
-    getChargeTypeInfo: (chargeType: string) => ChargeTypeMeta;
 };
 
-const UserPointTable: React.FC<Props> = ({ rows, totalCount, formatDate, getChargeTypeInfo }) => {
+const UserPointTable: React.FC<Props> = ({ rows, totalCount, formatDate }) => {
     return (
         <Card>
             <CardContent className='p-0'>
@@ -50,19 +43,14 @@ const UserPointTable: React.FC<Props> = ({ rows, totalCount, formatDate, getChar
                                 <TableHead className='text-white font-semibold text-right'>
                                     포인트
                                 </TableHead>
-                                <TableHead className='text-white font-semibold text-center'>
-                                    구분
-                                </TableHead>
+                                {/* removed 구분 column (badge) per new requirement */}
                             </TableRow>
                         </TableHeader>
                         <TableBody className='divide-y divide-gray-200'>
                             {rows.length > 0 ? (
                                 rows.map((pointRecord, index) => {
-                                    const isPositive =
-                                        pointRecord.chargeType === 'CHARGE' ||
-                                        pointRecord.chargeType === 'GIFT';
+                                    const isPositive = pointRecord.earnType === 'EARN';
                                     const sign = isPositive ? '+' : '-';
-                                    const typeInfo = getChargeTypeInfo(pointRecord.chargeType);
 
                                     return (
                                         <TableRow
@@ -72,15 +60,19 @@ const UserPointTable: React.FC<Props> = ({ rows, totalCount, formatDate, getChar
                                             <TableCell className='font-medium text-gray-700'>
                                                 <div className='space-y-1'>
                                                     <div className='text-sm'>
-                                                        {formatDate(pointRecord.createdAt)}
+                                                        {pointRecord.createdAt
+                                                            ? formatDate(pointRecord.createdAt)
+                                                            : ''}
                                                     </div>
                                                     <div className='text-xs text-gray-500'>
-                                                        {new Date(
-                                                            pointRecord.createdAt,
-                                                        ).toLocaleTimeString('ko-KR', {
-                                                            hour: '2-digit',
-                                                            minute: '2-digit',
-                                                        })}
+                                                        {pointRecord.createdAt
+                                                            ? new Date(
+                                                                  pointRecord.createdAt,
+                                                              ).toLocaleTimeString('ko-KR', {
+                                                                  hour: '2-digit',
+                                                                  minute: '2-digit',
+                                                              })
+                                                            : ''}
                                                     </div>
                                                 </div>
                                             </TableCell>
@@ -97,20 +89,12 @@ const UserPointTable: React.FC<Props> = ({ rows, totalCount, formatDate, getChar
                                                     {pointRecord.earnedPoint.toLocaleString()}P
                                                 </span>
                                             </TableCell>
-                                            <TableCell className='text-center'>
-                                                <Badge
-                                                    className={`${typeInfo.className} text-white flex items-center gap-1 justify-center w-fit mx-auto`}
-                                                >
-                                                    {typeInfo.icon}
-                                                    {typeInfo.label}
-                                                </Badge>
-                                            </TableCell>
                                         </TableRow>
                                     );
                                 })
                             ) : totalCount === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={4} className='text-center py-16'>
+                                    <TableCell colSpan={3} className='text-center py-16'>
                                         <div className='space-y-3'>
                                             <div className='text-6xl'>🥹</div>
                                             <div className='text-lg font-medium text-gray-600'>
@@ -124,7 +108,7 @@ const UserPointTable: React.FC<Props> = ({ rows, totalCount, formatDate, getChar
                                 </TableRow>
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={4} className='text-center py-16'>
+                                    <TableCell colSpan={3} className='text-center py-16'>
                                         <div className='space-y-3'>
                                             <div className='text-4xl'>🔍</div>
                                             <div className='text-lg font-medium text-gray-600'>

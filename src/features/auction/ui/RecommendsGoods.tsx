@@ -9,12 +9,6 @@ type Props = {
 const RecommendsGoods: FC<Props> = ({ id }) => {
     return (
         <div>
-            <div className='flex items-center my-4'>
-                <div className='flex-grow border-t border-uprimary border-2'></div>
-                <span className='px-4 text-uprimary text-xl'>다른 경매상품</span>
-                <div className='flex-grow border-t border-uprimary border-2'></div>
-            </div>
-
             <FetchRecommendAuctions id={id}>
                 {(data) => (
                     <div className='flex flex-wrap'>

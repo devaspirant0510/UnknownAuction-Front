@@ -6,7 +6,7 @@ import UserProfile from '@/features/user/ui/UserProfile.tsx';
 import SellerCard from '@widgets/user/SellerCard.tsx';
 import { Button } from '@shared/components/ui/button.tsx';
 import { Link, useNavigate } from 'react-router';
-import { axiosClient, DateUtil } from '@shared/lib';
+import { axiosClient, DateUtil, toastError } from '@shared/lib';
 import { useCookies } from 'react-cookie';
 import Cookies from 'js-cookie';
 import { ChartLine } from 'lucide-react';
@@ -16,6 +16,7 @@ import { useMutation } from '@tanstack/react-query';
 import FetchAccountStatus from '@/features/profile/ui/FetchAccountStatus.tsx';
 import { ProfileImage } from '@shared/ui';
 import { BaseLayout } from '@shared/layout';
+import { toast } from 'react-toastify';
 
 type Props = {
     id: number;
@@ -24,22 +25,13 @@ type Props = {
 
 const AuctionInfo: FC<Props> = ({ id, type }) => {
     const { isLoading, isError, error, data } = useQueryGetAuctionById(id);
-    const token = Cookies.get('access_token');
     const navigate = useNavigate();
     // POST 요청 mutation
     const { isPending, mutate } = useMutation({
         mutationFn: async () => {
-            return axiosClient.post(
-                'api/v1/auction/participate',
-                {
-                    auctionId: id,
-                },
-                {
-                    headers: {
-                        Authorization: 'Bearer ' + token,
-                    },
-                } as any,
-            );
+            return axiosClient.post('api/v1/auction/participate', {
+                auctionId: id,
+            });
         },
         onSuccess: () => {
             if (type === 'blind') {
@@ -50,10 +42,15 @@ const AuctionInfo: FC<Props> = ({ id, type }) => {
         },
         onError: (error) => {
             console.error('경매 참여 실패', error);
-            if (type === 'live') {
-                navigate(`/auction/chat/${id}`);
+            if (error.status === 401) {
+                toast('로그인 후 이용해주세요', { type: 'error' });
+                navigate('/login');
             } else {
-                navigate(`/auction/blind/chat/${id}`);
+                if (type === 'blind') {
+                    navigate(`/auction/blind/chat/${id}`);
+                } else {
+                    navigate(`/auction/chat/${id}`);
+                }
             }
         },
     });
@@ -67,6 +64,11 @@ const AuctionInfo: FC<Props> = ({ id, type }) => {
     const isEnded = data && data.data && new Date(data.data.auction.endTime).getTime() < Date.now();
     useEffect(() => {
         if (!data || !data.data) return;
+        if (data.data.auction.auctionType !== type.toUpperCase()) {
+            navigate('/');
+            toast('잘못된 접근입니다.', { type: 'error' });
+            return;
+        }
         const endTime = data.data.auction.endTime;
         let interval: NodeJS.Timeout | null = null;
         const updateRemain = () => {
@@ -93,6 +95,24 @@ const AuctionInfo: FC<Props> = ({ id, type }) => {
             if (interval) clearInterval(interval);
         };
     }, [data]);
+    const handleBidHistory = (endTimeData: string) => {
+        if (type === 'live') {
+            navigate(`/auction/live/${id}/bid-history`);
+            return;
+        }
+
+        if (type === 'blind') {
+            const endTime = new Date(endTimeData);
+            const now = new Date();
+
+            if (endTime > now) {
+                toastError('블라인드 경매는 종료 후에만 볼 수 있어요!');
+                return;
+            }
+
+            navigate(`/auction/live/${id}/bid-history`);
+        }
+    };
     if (isLoading) {
         return <>loading</>;
     }
@@ -117,7 +137,7 @@ const AuctionInfo: FC<Props> = ({ id, type }) => {
                 </div>
                 <div className={'mt-4 text-2xl font-bold flex justify-between'}>
                     <div>{data.data.auction.goods.title}</div>
-                    <Button onClick={() => navigate(`/auction/live/${id}/bid-history`)}>
+                    <Button onClick={() => handleBidHistory(data?.data?.auction.endTime ?? '')}>
                         <ChartLine />
                         거래 내역 상세보기
                     </Button>
@@ -163,9 +183,11 @@ const AuctionInfo: FC<Props> = ({ id, type }) => {
                             );
                         }}
                     </FetchAccountStatus>
-                    <div className={'flex flex-col '}>
-                        <Badge className={'bg-[var(--uprimary)] text-white'}>내용</Badge>
-                        {data.data.auction.goods.description}
+                    <div className={'flex flex-col mt-2'}>
+                        <Badge className={'bg-[var(--uprimary)] text-white mb-1'}>내용</Badge>
+                        <p className={'whitespace-pre-wrap'}>
+                            {data.data.auction.goods.description}
+                        </p>
                     </div>
                 </article>
                 <div className={'w-24'}></div>
@@ -179,7 +201,7 @@ const AuctionInfo: FC<Props> = ({ id, type }) => {
                             p
                         </div>
                     ) : (
-                        <div className={'text-uprimary font-bold text-4xl'}>***,***p</div>
+                        <div className={'text-uprimary font-bold text-4xl'}>Unknown</div>
                     )}
 
                     <button

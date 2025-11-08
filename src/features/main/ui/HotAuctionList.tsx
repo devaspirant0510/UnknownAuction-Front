@@ -18,7 +18,7 @@ const HotAuctionList = () => {
             <div className={'text-5xl font-bold text-[#B2B2B2] text-center mt-24'}>
                 진행 중인 <span className={'text-uprimary'}>HOT 경매</span>
             </div>
-            <div className={'text-xl text-center text-[#F7A17E] my-4'}>HOT BLIND</div>
+            <div className={'text-xl text-center text-[#F7A17E] my-4'}>HOT BID</div>
 
             <div className={'flex justify-center gap-16 w-full '}>
                 {data.data.map((v, index) => {
@@ -28,6 +28,7 @@ const HotAuctionList = () => {
                         </div>
                     );
                 })}
+                {data.data.length < 4 && <div className={'w-full h-full'}></div>}
             </div>
         </div>
     );

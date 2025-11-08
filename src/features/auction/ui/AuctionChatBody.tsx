@@ -1,4 +1,4 @@
-import React, { FC, useLayoutEffect, useRef } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 import { useQueryGetAllAuctionChat } from '@/features/auction/lib';
 import AuctionChatItem from '@widgets/auction/AuctionChatItem.tsx';
 import { useAuthUser } from '@shared/hooks/useAuthUser.tsx';
@@ -27,8 +27,6 @@ type Props = {
 const AuctionChatBody: FC<Props> = ({ auctionId, type }) => {
     const { isLoading, data, isError } = useQueryGetAllAuctionChat(auctionId);
     const scrollRef = useRef<HTMLDivElement | null>(null);
-    const lastMessageRef = useRef<HTMLDivElement | null>(null);
-    const confirmBidRef = useRef<HTMLDivElement | null>(null);
     const queries = queryClient.getQueriesData({
         queryKey: ['api', 'v1', 'auction', Number(auctionId)],
     });
@@ -38,20 +36,16 @@ const AuctionChatBody: FC<Props> = ({ auctionId, type }) => {
 
     const messages = data?.data ?? [];
 
-    useLayoutEffect(() => {
-        const scrollToEl = (el: HTMLElement | null) => {
-            if (!el) return;
-            el.scrollIntoView({ block: 'end', inline: 'nearest' });
-            const container = scrollRef.current;
-            if (container) container.scrollTop = container.scrollHeight;
-        };
-        requestAnimationFrame(() => {
-            if (confirmBidRef.current) {
-                scrollToEl(confirmBidRef.current);
-            } else if (lastMessageRef.current) {
-                scrollToEl(lastMessageRef.current);
-            }
-        });
+    // 스크롤을 항상 아래로 이동
+    useEffect(() => {
+        if (scrollRef.current) {
+            setTimeout(() => {
+                const container = scrollRef.current;
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            }, 0);
+        }
     }, [messages.length, auction]);
 
     if (isLoading) return <>loading</>;
@@ -74,6 +68,7 @@ const AuctionChatBody: FC<Props> = ({ auctionId, type }) => {
 
     let lastDate = '';
 
+    console.log(auction);
     return (
         <div className='px-8 pb-4 rounded-xl shadow-sm border-1'>
             <div ref={scrollRef} className='flex h-[48vh] flex-col overflow-y-scroll'>
@@ -83,7 +78,7 @@ const AuctionChatBody: FC<Props> = ({ auctionId, type }) => {
                     if (showDateSeparator) lastDate = currentDate;
 
                     const isLast = index === messages.length - 1;
-                    const isMe = v.user.id === id;
+                    const isMe = v.userId === id;
 
                     return (
                         <React.Fragment key={index}>
@@ -91,16 +86,22 @@ const AuctionChatBody: FC<Props> = ({ auctionId, type }) => {
 
                             <div
                                 className={`my-1 flex ${isMe ? 'justify-end' : ''}`}
-                                ref={isLast ? lastMessageRef : null}
+                                ref={isLast ? null : null}
                             >
-                                <AuctionChatItem data={v} isMe={isMe} type={type} />
+                                <AuctionChatItem
+                                    auctionTitle={auction?.data?.auction?.goods?.title ?? ''}
+                                    data={v}
+                                    ownerId={auction?.data?.auction.user.id}
+                                    isMe={isMe}
+                                    type={type}
+                                />
                             </div>
                         </React.Fragment>
                     );
                 })}
 
                 {isEnded && (
-                    <FetchConfirmBid auctionId={auctionId} ref={confirmBidRef}>
+                    <FetchConfirmBid auctionId={auctionId} ref={null}>
                         {(bidData) => {
                             if (!bidData) return <>정산중...</>;
                             return (
