@@ -248,30 +248,7 @@ feat: 실시간 경매 입찰 기능 구현
 ## 🏛 프로젝트 구조
 
 이 프로젝트는 **프론트엔드**와 **백엔드**로 구성된 풀스택 애플리케이션입니다.
-
-```mermaid
-graph TB
-    subgraph "🎨 Frontend"
-        A[React + TypeScript]
-        B[WebSocket Client]
-        C[React Query]
-    end
-    
-    subgraph "⚙️ Backend"
-        D[Spring Boot]
-        E[WebSocket Server]
-        F[Database]
-    end
-    
-    A -->|HTTP/REST API| D
-    B -->|WebSocket/STOMP| E
-    C -->|Data Fetching| D
-    E -->|Real-time Updates| B
-    D -->|Query/Update| F
-    
-    style A fill:#61DAFB
-    style D fill:#6DB33F
-```
+<img width="2346" height="1704" alt="제목 없는 다이어그램 drawio" src="https://github.com/user-attachments/assets/7841978d-0b39-4d94-8186-c7ad519b80a3" />
 
 ### 📚 관련 저장소
 
