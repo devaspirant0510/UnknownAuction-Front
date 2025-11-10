@@ -4,11 +4,10 @@ import { BaseLayout } from '@shared/layout/index.ts';
 
 type Props = {
     children: React.ReactNode;
-    isBanner?: boolean;
     className?: string;
     headerClassName?: string;
 };
-const MainLayout: FC<Props> = ({ children, isBanner, className, headerClassName }) => {
+const MainLayout: FC<Props> = ({ children, className, headerClassName }) => {
     return (
         <>
             <div className={`relative ${headerClassName}`}>
