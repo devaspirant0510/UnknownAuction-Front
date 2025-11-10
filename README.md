@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎯  Unknown Auction
+# 🎯 Unknown Auction
 
 ### ⚡ 실시간 경매 플랫폼
 
@@ -9,12 +9,40 @@
 [![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.x-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 
+<br/>
+
+### 📦 프로젝트 저장소
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <a href="https://github.com/devaspirant0510/UnknownAuction-Front">
+        <img src="https://img.shields.io/badge/Frontend-181717?style=for-the-badge&logo=github&logoColor=white" alt="Frontend Repository"/>
+      </a>
+      <br/>
+      <sub><b>🎨 프론트엔드 저장소</b></sub>
+      <br/>
+      <sub>React + TypeScript + Vite</sub>
+    </td>
+    <td align="center" width="50%">
+      <a href="https://github.com/devaspirant0510/UnknownAuction-Server">
+        <img src="https://img.shields.io/badge/Backend-181717?style=for-the-badge&logo=github&logoColor=white" alt="Backend Repository"/>
+      </a>
+      <br/>
+      <sub><b>⚙️ 백엔드 저장소</b></sub>
+      <br/>
+      <sub>Spring Boot + WebSocket</sub>
+    </td>
+  </tr>
+</table>
+
 </div>
 
 ---
 
 ## 📋 목차
 
+- [프로젝트 저장소](#-프로젝트-저장소)
 - [기술 스택](#-기술-스택)
 - [환경 변수 설정](#-환경-변수-설정)
 - [프론트엔드 아키텍처](#-프론트엔드-아키텍처)
@@ -112,14 +140,13 @@ VITE_FIREBASE_VAPID_KEY=your_firebase_vapid_key
 ### 레이어별 상세 설명
 
 <details>
-<summary><strong>🔧 Shared</strong> - 전체 앱에서 재사용되는 공통 코드</summary>
+<summary><strong>📄 Pages</strong> - 완성된 페이지</summary>
 
 | 세그먼트 | 설명 | 예시 |
 |---------|------|------|
-| **ui** | 공통 UI Kit | Button, TextField, Modal |
-| **lib** | 유틸리티 함수 | formatDate, debounce |
-| **api** | API 클라이언트 | axios 인스턴스, 인증 처리 |
-| **model** | - | 거의 사용 안 함 |
+| **ui** | 페이지 조합 | HomePage, ProfilePage |
+| **lib** | 페이지 기능 | usePageScroll |
+| **api** | 데이터 로더 | SSR 프레임워크용 |
 
 </details>
 
@@ -217,3 +244,56 @@ feat: 실시간 경매 입찰 기능 구현
 ```
 
 ---
+
+## 🏛 프로젝트 구조
+
+이 프로젝트는 **프론트엔드**와 **백엔드**로 구성된 풀스택 애플리케이션입니다.
+
+```mermaid
+graph TB
+    subgraph "🎨 Frontend"
+        A[React + TypeScript]
+        B[WebSocket Client]
+        C[React Query]
+    end
+    
+    subgraph "⚙️ Backend"
+        D[Spring Boot]
+        E[WebSocket Server]
+        F[Database]
+    end
+    
+    A -->|HTTP/REST API| D
+    B -->|WebSocket/STOMP| E
+    C -->|Data Fetching| D
+    E -->|Real-time Updates| B
+    D -->|Query/Update| F
+    
+    style A fill:#61DAFB
+    style D fill:#6DB33F
+```
+
+### 📚 관련 저장소
+
+| 저장소 | 설명 | 기술 스택 | 링크 |
+|--------|------|-----------|------|
+| 🎨 **Frontend** | 사용자 인터페이스 | React, TypeScript, Vite, TailwindCSS | [바로가기](https://github.com/devaspirant0510/UnknownAuction-Front) |
+| ⚙️ **Backend** | API 서버 및 비즈니스 로직 | Spring Boot, WebSocket, JPA | [바로가기](https://github.com/devaspirant0510/UnknownAuction-Server) |
+
+> 💡 **Tip**: 전체 프로젝트를 실행하려면 백엔드와 프론트엔드 저장소를 모두 클론하고 실행해야 합니다.
+
+---
+
+<div align="center">
+
+### 🎉 Happy Coding! 🎉
+
+**Made with ❤️ by Unknown Auction Team**
+
+<br/>
+
+[![Frontend](https://img.shields.io/badge/🎨_Frontend-Repository-61DAFB?style=for-the-badge)](https://github.com/devaspirant0510/UnknownAuction-Front)
+[![Backend](https://img.shields.io/badge/⚙️_Backend-Repository-6DB33F?style=for-the-badge)](https://github.com/devaspirant0510/UnknownAuction-Server)
+
+</div>
+
