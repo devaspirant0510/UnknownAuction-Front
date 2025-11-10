@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -6,7 +6,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@shared/components/ui/dialog.tsx';
-import { GavelIcon } from 'lucide-react';
 import { useLocation, useParams } from 'react-router';
 import { useAuthUser } from '@shared/hooks/useAuthUser.tsx';
 import { Client } from 'stompjs';
@@ -18,7 +17,6 @@ import { FetchMyProfile } from '@/features/user/ui';
 import FetchLastBidPrice from '@/features/auction/ui/FetchLastBidPrice';
 import { axiosClient, toastError } from '@shared/lib';
 import { useQueryClient } from '@tanstack/react-query';
-import { Badge } from '@shared/components/ui';
 
 type Params = {
     id: number;

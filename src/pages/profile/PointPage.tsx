@@ -3,7 +3,6 @@ import FetchMyPointHistory from '@/features/profile/ui/FetchMyPointHistory.tsx';
 import {
     UserPointHeader,
     UserPointSummaryCards,
-    UserPointFilterBar,
     UserPointTable,
     UserPointCountFooter,
 } from '@/widgets/user';

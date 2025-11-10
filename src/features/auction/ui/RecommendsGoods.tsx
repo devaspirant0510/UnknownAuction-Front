@@ -1,7 +1,5 @@
 import React, { FC } from 'react';
 import FetchRecommendAuctions from '@/features/auction/ui/FetchRecommendAuctions.tsx';
-import { ProfileImage } from '@shared/ui';
-import { getServerURL } from '@shared/lib';
 
 type Props = {
     id: number;

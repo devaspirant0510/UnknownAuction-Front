@@ -8,13 +8,7 @@ type Props = {
     onMessageSent?: () => void;
 };
 
-const DMChatInput: React.FC<Props> = ({
-                                          client,
-                                          roomId,
-                                          senderId,
-                                          receiverId,
-                                          onMessageSent,
-                                      }) => {
+const DMChatInput: React.FC<Props> = ({ client, roomId, senderId, receiverId, onMessageSent }) => {
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -76,19 +70,19 @@ const DMChatInput: React.FC<Props> = ({
     };
 
     return (
-        <div className="flex items-center gap-2 p-4 border-t border-gray-200 bg-white">
+        <div className='flex items-center gap-2 p-4 border-t border-gray-200 bg-white'>
             <input
-                className="flex-1 border border-gray-300 p-3 rounded-lg focus:outline-none focus:border-orange-400"
+                className='flex-1 border border-gray-300 p-3 rounded-lg focus:outline-none focus:border-orange-400'
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="메시지를 입력하세요..."
+                placeholder='메시지를 입력하세요...'
                 disabled={isLoading}
-                type="text"
+                type='text'
             />
             <button
-                type="button"
-                className="bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                type='button'
+                className='bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50'
                 onClick={(e) => handleSend(e)}
                 disabled={isLoading || !message.trim()}
             >

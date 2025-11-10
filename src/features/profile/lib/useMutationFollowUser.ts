@@ -5,15 +5,11 @@ import { ApiResult } from '@entities/common';
 import { FollowEntity } from '@entities/user/model';
 
 const followUser = (userId: number) => {
-    return axiosClient.patch<ApiResult<FollowEntity>>(
-        `/api/v1/profile/follow/${userId}`,
-        null,
-        {
-            headers: {
-                Authorization: `Bearer ${Cookies.get('access_token') || ''}`,
-            },
+    return axiosClient.patch<ApiResult<FollowEntity>>(`/api/v1/profile/follow/${userId}`, null, {
+        headers: {
+            Authorization: `Bearer ${Cookies.get('access_token') || ''}`,
         },
-    );
+    });
 };
 
 export const useMutationFollowUser = () => {

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { httpFetcher } from '@shared/lib';
 import { ApiResult } from '@entities/common';
-import { ChatDto, ChatEntity } from '@entities/auction/model';
+import { ChatDto } from '@entities/auction/model';
 
 export const useQueryGetAllAuctionChat = (id: number) => {
     return useQuery({

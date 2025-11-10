@@ -2,7 +2,6 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FilterIcon } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { BaseLayout } from '@shared/layout';
-import { Category } from '@entities/auction/model';
 import CategoryItem from '@widgets/auction/CategoryItem';
 import { useQueryGetCategories } from '@/features/auction/lib';
 

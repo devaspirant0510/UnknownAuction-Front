@@ -1,7 +1,6 @@
 import React, { FC, useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import axios from 'axios';
-import Cookies from 'js-cookie';
 import { getServerURL } from '@shared/lib';
 import { useAuthStore } from '@shared/store/AuthStore.ts';
 

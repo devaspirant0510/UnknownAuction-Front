@@ -20,7 +20,11 @@ const NotificationListPage: React.FC = () => {
     const queryClient = useQueryClient();
 
     // 알림 목록 조회
-    const { data: notifications = [], isLoading, isError } = useQuery({
+    const {
+        data: notifications = [],
+        isLoading,
+        isError,
+    } = useQuery({
         queryKey: ['notifications', 'list', currentPage],
         queryFn: async () => {
             const response = await axiosClient.get(`/api/v1/notifications?page=${currentPage}`);
@@ -170,11 +174,11 @@ const NotificationListPage: React.FC = () => {
                                             <div className='flex items-center gap-2 mb-1'>
                                                 <span
                                                     className={`px-2 py-0.5 rounded text-xs font-medium ${getNotificationTypeBadge(
-                                                        notification.notificationType
+                                                        notification.notificationType,
                                                     )}`}
                                                 >
                                                     {getNotificationTypeText(
-                                                        notification.notificationType
+                                                        notification.notificationType,
                                                     )}
                                                 </span>
                                                 <p className='text-gray-400 text-xs'>
@@ -206,9 +210,7 @@ const NotificationListPage: React.FC = () => {
                             >
                                 이전
                             </button>
-                            <span className='text-gray-600'>
-                                {currentPage + 1} 페이지
-                            </span>
+                            <span className='text-gray-600'>{currentPage + 1} 페이지</span>
                             <button
                                 onClick={handleNextPage}
                                 disabled={notifications.length < 10}

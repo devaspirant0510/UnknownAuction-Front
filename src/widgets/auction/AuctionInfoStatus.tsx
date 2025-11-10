@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { AuctionData, AuctionInfoData } from '@entities/auction/model';
+import { AuctionInfoData } from '@entities/auction/model';
 import AuctionParticipantsDialog from '@widgets/auction/dialog/AuctionParticipantsDialog.tsx';
 import StatusDeliveryType from '@widgets/auction/info/StatusDeliveryType.tsx';
 import { DateUtil } from '@shared/lib';

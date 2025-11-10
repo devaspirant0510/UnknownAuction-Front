@@ -1,6 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
-import { AccessTokenPayload, parseJwtPayload } from '@shared/lib/jwtUtils.ts';
+import { AccessTokenPayload } from '@shared/lib/jwtUtils.ts';
 import { useAuthStore } from '@shared/store/AuthStore.ts';
 
 // 튜플 타입 정의

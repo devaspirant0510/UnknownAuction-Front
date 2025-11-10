@@ -13,7 +13,11 @@ interface FollowListModalProps {
     initialTab: 'followers' | 'followings';
 }
 
-export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClose, initialTab }) => {
+export const FollowListModal: React.FC<FollowListModalProps> = ({
+    isOpen,
+    onClose,
+    initialTab,
+}) => {
     const [_, authUserId] = useAuthUser();
     const [tab, setTab] = useState<'followers' | 'followings'>(initialTab);
 

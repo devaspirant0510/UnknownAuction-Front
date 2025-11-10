@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { httpFetcher } from '@shared/lib';
 import { Card } from '@shared/components/ui/card.tsx';
-import { Image } from 'lucide-react';
 
 const AuctionListLegacy = () => {
     const { isLoading, isError, error, data } = useQuery({

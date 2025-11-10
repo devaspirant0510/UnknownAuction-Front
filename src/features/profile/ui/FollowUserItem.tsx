@@ -24,11 +24,11 @@ interface FollowUserItemProps {
 }
 
 export const FollowUserItem: React.FC<FollowUserItemProps> = ({
-                                                                  user,
-                                                                  type,
-                                                                  authUserId,
-                                                                  onCloseModal, // [추가]
-                                                              }) => {
+    user,
+    type,
+    authUserId,
+    onCloseModal, // [추가]
+}) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const queryClient = useQueryClient();
     const [_, currentAuthUserId] = useAuthUser();
@@ -85,7 +85,7 @@ export const FollowUserItem: React.FC<FollowUserItemProps> = ({
                 {/* [수정] Link 컴포넌트로 프로필 영역을 감쌉니다. */}
                 <Link
                     to={`/users/${user.id}`} // [수정] 동적 URL
-                    onClick={onCloseModal}    // [수정] 클릭 시 모달을 닫습니다.
+                    onClick={onCloseModal} // [수정] 클릭 시 모달을 닫습니다.
                     className='flex items-center space-x-3 group' // [수정] group 클래스 추가 (hover 효과용)
                 >
                     {user.profileUrl ? (
@@ -97,7 +97,7 @@ export const FollowUserItem: React.FC<FollowUserItemProps> = ({
                     ) : (
                         <div className='w-10 h-10 bg-gray-300 rounded-full' />
                     )}
-                    <span className="group-hover:underline">{user.nickname}</span>
+                    <span className='group-hover:underline'>{user.nickname}</span>
                 </Link>
 
                 {/* --- 버튼 영역 --- */}
@@ -144,16 +144,13 @@ export const FollowUserItem: React.FC<FollowUserItemProps> = ({
                     {/* ... (모달 내용은 동일) ... */}
                     <DialogHeader>
                         <DialogTitle>팔로우 취소</DialogTitle>
-                        <DialogDescription className="pt-4">
-                            <span className="font-semibold">{user.nickname}</span>님의
-                            팔로우를 취소하시겠습니까?
+                        <DialogDescription className='pt-4'>
+                            <span className='font-semibold'>{user.nickname}</span>님의 팔로우를
+                            취소하시겠습니까?
                         </DialogDescription>
                     </DialogHeader>
-                    <DialogFooter className="gap-2 pt-4">
-                        <Button
-                            variant='secondary'
-                            onClick={() => setIsModalOpen(false)}
-                        >
+                    <DialogFooter className='gap-2 pt-4'>
+                        <Button variant='secondary' onClick={() => setIsModalOpen(false)}>
                             닫기
                         </Button>
                         <Button

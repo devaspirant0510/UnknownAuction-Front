@@ -1,5 +1,5 @@
-import React, {useEffect, useState, useRef, useCallback} from 'react';
-import {axiosClient, getServerURL} from '@shared/lib';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { axiosClient, getServerURL } from '@shared/lib';
 import AuctionInfoCard from '@/pages/dm/AuctionInfoCard';
 
 type Props = {
@@ -22,12 +22,12 @@ type Message = {
 };
 
 const DMChatBody: React.FC<Props> = ({
-                                         client,
-                                         roomId,
-                                         userId,
-                                         onMessageReceived,
-                                         onMessagesRead,
-                                     }) => {
+    client,
+    roomId,
+    userId,
+    onMessageReceived,
+    onMessagesRead,
+}) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [auctionInfo, setAuctionInfo] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -66,9 +66,7 @@ const DMChatBody: React.FC<Props> = ({
 
     const markMessagesAsRead = useCallback(async () => {
         try {
-            await axiosClient.post(
-                `${getServerURL()}/api/dm/chat/read/${roomId}`
-            );
+            await axiosClient.post(`${getServerURL()}/api/dm/chat/read/${roomId}`);
             if (onMessagesRead) {
                 onMessagesRead();
             }
@@ -84,7 +82,7 @@ const DMChatBody: React.FC<Props> = ({
     const checkAuctionSoldStatus = useCallback(async (auctionId: number) => {
         try {
             const response = await axiosClient.get(
-                `${getServerURL()}/api/v1/payment/point-history/check-purchase/${auctionId}`
+                `${getServerURL()}/api/v1/payment/point-history/check-purchase/${auctionId}`,
             );
 
             // ApiResult 응답 구조: { data: true/false, message: "...", success: true }
@@ -104,7 +102,8 @@ const DMChatBody: React.FC<Props> = ({
 
         const sellerId = auctionInfo?.data?.auction?.user?.id;
         const auctionId = auctionInfo?.data?.auction?.id;
-        const finalPrice = auctionInfo?.data?.lastBiddingLog?.price || auctionInfo?.data?.auction?.startPrice;
+        const finalPrice =
+            auctionInfo?.data?.lastBiddingLog?.price || auctionInfo?.data?.auction?.startPrice;
 
         const isBuyer = sellerId !== userId;
         if (!isBuyer) {
@@ -127,7 +126,7 @@ const DMChatBody: React.FC<Props> = ({
                     sellerId: sellerId,
                     amount: finalPrice,
                     roomId: roomId,
-                }
+                },
             );
 
             if (response.data) {
@@ -152,9 +151,7 @@ const DMChatBody: React.FC<Props> = ({
                 setAuctionInfo(null);
                 setIsAuctionSold(false);
 
-                const response = await axiosClient.get(
-                    `${getServerURL()}/api/dm/chat/${roomId}`
-                );
+                const response = await axiosClient.get(`${getServerURL()}/api/dm/chat/${roomId}`);
 
                 if (response.data && response.data.length > 0) {
                     const chats = response.data;
@@ -163,7 +160,7 @@ const DMChatBody: React.FC<Props> = ({
                         const auctionId = parseInt(chats[0].contents.split(':')[1]);
                         try {
                             const auctionResponse = await axiosClient.get(
-                                `${getServerURL()}/api/v1/auction/${auctionId}`
+                                `${getServerURL()}/api/v1/auction/${auctionId}`,
                             );
                             setAuctionInfo(auctionResponse.data);
                         } catch (error) {
@@ -249,8 +246,8 @@ const DMChatBody: React.FC<Props> = ({
 
     if (isLoading) {
         return (
-            <div className="flex-1 flex items-center justify-center">
-                <p className="text-gray-500">메시지를 불러오는 중...</p>
+            <div className='flex-1 flex items-center justify-center'>
+                <p className='text-gray-500'>메시지를 불러오는 중...</p>
             </div>
         );
     }
@@ -260,7 +257,7 @@ const DMChatBody: React.FC<Props> = ({
     const isBuyer = auctionInfo && sellerId !== userId;
 
     return (
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 bg-gray-50">
+        <div ref={scrollRef} className='flex-1 overflow-y-auto p-4 bg-gray-50'>
             {auctionInfo && (
                 <AuctionInfoCard
                     auctionData={auctionInfo}
@@ -273,8 +270,8 @@ const DMChatBody: React.FC<Props> = ({
             )}
 
             {messages.length === 0 ? (
-                <div className="flex items-center justify-center h-32">
-                    <p className="text-gray-400">메시지가 없습니다. 첫 메시지를 보내보세요!</p>
+                <div className='flex items-center justify-center h-32'>
+                    <p className='text-gray-400'>메시지가 없습니다. 첫 메시지를 보내보세요!</p>
                 </div>
             ) : (
                 messages.map((m, index) => {
@@ -289,8 +286,7 @@ const DMChatBody: React.FC<Props> = ({
 
                         if (index === 0) {
                             dateSeparatorElement = (
-                                <div
-                                    className="my-4 text-center text-xs text-gray-500 bg-gray-200 rounded-full px-3 py-1 mx-auto w-fit">
+                                <div className='my-4 text-center text-xs text-gray-500 bg-gray-200 rounded-full px-3 py-1 mx-auto w-fit'>
                                     {formatDateSeparator(currentMessage.createdAt)}
                                 </div>
                             );
@@ -298,8 +294,7 @@ const DMChatBody: React.FC<Props> = ({
                             const prevDate = new Date(prevMessage.createdAt);
                             if (!isSameDay(currentDate, prevDate)) {
                                 dateSeparatorElement = (
-                                    <div
-                                        className="my-4 text-center text-xs text-gray-500 bg-gray-200 rounded-full px-3 py-1 mx-auto w-fit">
+                                    <div className='my-4 text-center text-xs text-gray-500 bg-gray-200 rounded-full px-3 py-1 mx-auto w-fit'>
                                         {formatDateSeparator(currentMessage.createdAt)}
                                     </div>
                                 );
@@ -311,7 +306,9 @@ const DMChatBody: React.FC<Props> = ({
 
                     if (nextMessage && nextMessage.createdAt && currentMessage.createdAt) {
                         const isSameSender = currentMessage.senderId === nextMessage.senderId;
-                        const isSameMinute = formatTime(currentMessage.createdAt) === formatTime(nextMessage.createdAt);
+                        const isSameMinute =
+                            formatTime(currentMessage.createdAt) ===
+                            formatTime(nextMessage.createdAt);
 
                         if (isSameSender && isSameMinute) {
                             showTime = false;
@@ -339,14 +336,14 @@ const DMChatBody: React.FC<Props> = ({
                                         {m.contents}
                                     </div>
 
-                                    <div className="flex flex-col items-center gap-1">
+                                    <div className='flex flex-col items-center gap-1'>
                                         {m.senderId === userId && m.readCount !== undefined && (
-                                            <span className="text-xs text-gray-400">
+                                            <span className='text-xs text-gray-400'>
                                                 {m.readCount === 0 ? '1' : ''}
                                             </span>
                                         )}
                                         {showTime && (
-                                            <span className="text-xs text-gray-400 whitespace-nowrap">
+                                            <span className='text-xs text-gray-400 whitespace-nowrap'>
                                                 {m.createdAt ? formatTime(m.createdAt) : ''}
                                             </span>
                                         )}

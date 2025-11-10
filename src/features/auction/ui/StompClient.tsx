@@ -1,11 +1,8 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
-import SockJS from 'sockjs-client';
-import Stomp, { Client } from 'stompjs';
+import { Client } from 'stompjs';
 import * as StompJs from '@stomp/stompjs';
 import { IFrame } from '@stomp/stompjs';
 import { useQueryClient } from '@tanstack/react-query';
-import Cookies from 'js-cookie';
-import { useAuthUser } from '@shared/hooks/useAuthUser.tsx';
 import { ChatEntity } from '@entities/auction/model';
 import { useAuthStore } from '@shared/store/AuthStore.ts';
 

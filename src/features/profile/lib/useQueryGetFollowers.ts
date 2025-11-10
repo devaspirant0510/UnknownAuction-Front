@@ -4,7 +4,8 @@ import { FollowUser } from '@entities/user/model';
 import { axiosClient } from '@shared/lib/axiosClient.ts'; // [추가]
 import Cookies from 'js-cookie'; // [추가]
 
-export const useQueryGetFollowers = (userId: number | undefined) => { // [수정] number | undefined
+export const useQueryGetFollowers = (userId: number | undefined) => {
+    // [수정] number | undefined
     return useQuery({
         queryKey: ['api', 'v1', 'profile', userId, 'followers'],
         queryFn: async () => {
@@ -15,7 +16,7 @@ export const useQueryGetFollowers = (userId: number | undefined) => { // [수정
                     headers: {
                         Authorization: `Bearer ${Cookies.get('access_token') || ''}`,
                     },
-                }
+                },
             );
             return response.data;
         },

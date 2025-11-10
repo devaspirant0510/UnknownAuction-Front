@@ -1,8 +1,6 @@
 import React, { FC } from 'react';
 import { useQueryGetUserById } from '@/features/user/lib/useQueryGetUserById.ts';
-import { Card } from '@shared/components/ui/card.tsx';
-import { Badge } from '@shared/components/ui/badge.tsx';
-import { Account, AccountDto } from '@entities/user/model';
+import { AccountDto } from '@entities/user/model';
 
 type Props = {
     userId: number;

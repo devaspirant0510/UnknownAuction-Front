@@ -1,14 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // react-router-dom에서 useNavigate 임포트
 import LoginPan from './loginpan';
-import { MainLayout } from '@shared/layout';
 import { AuthLoginButton } from '@/features/login/ui';
-import Cookies from 'js-cookie';
 import useInput from '@shared/hooks/useInput.ts';
 import { axiosClient } from '@shared/lib';
 import { useAuthStore } from '@shared/store/AuthStore.ts';
 import { Navigate } from 'react-router';
-import {AppLayout} from "@/shared/layout";
+import { AppLayout } from '@/shared/layout';
 
 function LoginPage() {
     const [isLoginPanOpen, setIsLoginPanOpen] = useState(false);
@@ -177,7 +175,6 @@ function LoginPage() {
 
                 {/* 로그인 모달 */}
                 <LoginPan isOpen={isLoginPanOpen} onClose={handleLoginPanClose} />
-
             </div>
         </AppLayout>
     );

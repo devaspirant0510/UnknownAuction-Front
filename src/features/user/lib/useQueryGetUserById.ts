@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { httpFetcher } from '@shared/lib';
-import { Account, AccountDto } from '@entities/user/model';
+import { AccountDto } from '@entities/user/model';
 import { ApiResult } from '@entities/common';
 
 export const useQueryGetUserById = (id: number) => {

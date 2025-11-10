@@ -1,5 +1,4 @@
 import React, { FC, useCallback, useState } from 'react';
-import { useQueryGetAuctionHistory } from '@/features/auction/lib';
 import { Page } from '@entities/common';
 import { BidLog } from '@entities/auction/model';
 import { useQueryGetAuctionHistoryPage } from '@/features/auction/lib/useQueryGetAuctionHistoryPaging.ts';

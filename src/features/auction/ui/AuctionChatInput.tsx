@@ -1,17 +1,10 @@
 import React, { FC, useCallback } from 'react';
 import { Input } from '@shared/components/ui/input.tsx';
-import StompClient from '@/features/auction/ui/StompClient.tsx';
 import { Client } from 'stompjs';
 import useInput from '@shared/hooks/useInput.ts';
 import { Button } from '@shared/components/ui/button.tsx';
 import { Account } from '@entities/user/model';
-import {
-    ImageIcon,
-    MessageSquareIcon,
-    MessageSquareTextIcon,
-    SendIcon,
-    SmileIcon,
-} from 'lucide-react';
+import { ImageIcon, MessageSquareTextIcon, SendIcon, SmileIcon } from 'lucide-react';
 
 type Props = {
     client: Client;

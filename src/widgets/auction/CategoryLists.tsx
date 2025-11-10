@@ -1,10 +1,5 @@
-import { useQueryGetCategories } from '@/features/auction/lib';
 import AuctionCategory from '@/features/auction/ui/AuctionCategory.tsx';
-import React, { FC, useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import CategoryItem from '@widgets/auction/CategoryItem.tsx';
-import { BaseLayout } from '@shared/layout';
-import { FilterIcon } from 'lucide-react';
+import React, { FC } from 'react';
 
 type Props = {
     type: 'blind' | 'live';

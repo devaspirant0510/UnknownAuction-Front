@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { axiosClient, getServerURL } from '@shared/lib';
+import { axiosClient } from '@shared/lib';
 
 type Props = {
     selectedCategoryId: number | null; // null 허용으로 수정

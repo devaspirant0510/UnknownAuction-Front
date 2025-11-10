@@ -16,7 +16,7 @@ import FloatingMenu from '@/widgets/ui/FloatingMenu';
 import CompanyPage from '@pages/info/CompanyPage.tsx';
 import TermPage from '@pages/info/TermPage.tsx';
 import PrivacyPage from '@pages/info/PrivacyPage.tsx';
-import InterestsViewPage from "@/features/profile/ui/InterestsViewPage";
+import InterestsViewPage from '@/features/profile/ui/InterestsViewPage';
 
 const HomePage = React.lazy(() => import('@pages/home/HomePage.tsx'));
 const FeedPage = React.lazy(() => import('@pages/feed/FeedPage.tsx'));
@@ -46,7 +46,9 @@ const ShopPage = React.lazy(() => import('@pages/shop/ShopPage.tsx'));
 const DMPage = React.lazy(() => import('@pages/dm/DMPage.tsx'));
 const NotFoundPage = React.lazy(() => import('@pages/common/NotFoundPage.tsx'));
 
-const NotificationListPage = React.lazy(() => import('@/pages/notification/NotificationListPage.tsx'));
+const NotificationListPage = React.lazy(
+    () => import('@/pages/notification/NotificationListPage.tsx'),
+);
 
 const ServerMaintenancePage = React.lazy(() => import('@pages/info/ServerMaintenancePage.tsx'));
 

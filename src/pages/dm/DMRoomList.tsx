@@ -17,12 +17,7 @@ type Props = {
     onSelectRoom: (roomId: number, participantId: number) => void;
 };
 
-const DMRoomList: React.FC<Props> = ({
-                                         rooms,
-                                         selectedRoomId,
-                                         isLoading,
-                                         onSelectRoom,
-                                     }) => {
+const DMRoomList: React.FC<Props> = ({ rooms, selectedRoomId, isLoading, onSelectRoom }) => {
     const formatTime = (dateString: string) => {
         const date = new Date(dateString);
         const now = new Date();
@@ -45,19 +40,19 @@ const DMRoomList: React.FC<Props> = ({
     };
 
     return (
-        <div className="w-96 border-r border-gray-200 flex flex-col">
-            <div className="p-4 border-b border-gray-200">
-                <h2 className="text-xl font-bold text-gray-800">메시지</h2>
+        <div className='w-96 border-r border-gray-200 flex flex-col'>
+            <div className='p-4 border-b border-gray-200'>
+                <h2 className='text-xl font-bold text-gray-800'>메시지</h2>
             </div>
 
-            <div className="flex-1 overflow-y-auto">
+            <div className='flex-1 overflow-y-auto'>
                 {isLoading ? (
-                    <div className="flex items-center justify-center h-full">
-                        <p className="text-gray-500">로딩 중...</p>
+                    <div className='flex items-center justify-center h-full'>
+                        <p className='text-gray-500'>로딩 중...</p>
                     </div>
                 ) : rooms.length === 0 ? (
-                    <div className="flex items-center justify-center h-full">
-                        <p className="text-gray-400 text-center">
+                    <div className='flex items-center justify-center h-full'>
+                        <p className='text-gray-400 text-center'>
                             아직 채팅방이 없습니다.
                             <br />
                             누군가와 대화를 시작하세요!
@@ -65,7 +60,11 @@ const DMRoomList: React.FC<Props> = ({
                     </div>
                 ) : (
                     [...rooms]
-                        .sort((a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime())
+                        .sort(
+                            (a, b) =>
+                                new Date(b.lastMessageTime).getTime() -
+                                new Date(a.lastMessageTime).getTime(),
+                        )
                         .map((room) => (
                             <div
                                 key={room.roomId}
@@ -76,23 +75,23 @@ const DMRoomList: React.FC<Props> = ({
                                         : 'hover:bg-gray-50'
                                 }`}
                             >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="font-semibold text-gray-800 truncate">
+                                <div className='flex items-center justify-between'>
+                                    <div className='flex-1 min-w-0'>
+                                        <h3 className='font-semibold text-gray-800 truncate'>
                                             {room.participantNickname}
                                         </h3>
-                                        <p className="text-sm text-gray-500 truncate">
+                                        <p className='text-sm text-gray-500 truncate'>
                                             {room.lastMessage || '메시지 없음'}
                                         </p>
                                     </div>
-                                    <div className="flex items-center gap-2 ml-2">
+                                    <div className='flex items-center gap-2 ml-2'>
                                         {/* ✅ 미읽음 뱃지 */}
                                         {room.unreadCount > 0 && (
-                                            <span className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                            <span className='bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center'>
                                                 {room.unreadCount > 99 ? '99+' : room.unreadCount}
                                             </span>
                                         )}
-                                        <span className="text-xs text-gray-400 whitespace-nowrap">
+                                        <span className='text-xs text-gray-400 whitespace-nowrap'>
                                             {formatTime(room.lastMessageTime)}
                                         </span>
                                     </div>

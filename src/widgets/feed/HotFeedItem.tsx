@@ -24,7 +24,7 @@ const HotFeedItem: FC<Props> = ({ feed }) => {
             <div className={'flex items-center gap-2 my-2 flex-1'}>
                 <div className={'flex flex-1 gap-2 items-center'}>
                     {/* 프로필 이미지 (클릭 기능) */}
-                    <div onClick={handleProfileClick} className="cursor-pointer">
+                    <div onClick={handleProfileClick} className='cursor-pointer'>
                         <ProfileImage size={40} src={feed.feed.user.profileUrl} />
                     </div>
 
@@ -32,11 +32,10 @@ const HotFeedItem: FC<Props> = ({ feed }) => {
                         {/* 닉네임 (클릭 기능) */}
                         <div
                             onClick={handleProfileClick}
-                            className="cursor-pointer hover:underline"
+                            className='cursor-pointer hover:underline'
                         >
                             {feed.feed.user.nickname}
                         </div>
-
                     </div>
                 </div>
                 <div className={'truncate flex-4'}>{feed.feed.contents}</div>
@@ -52,7 +51,6 @@ const HotFeedItem: FC<Props> = ({ feed }) => {
                 </div>
             </div>
             <hr />
-
         </div>
     );
 };

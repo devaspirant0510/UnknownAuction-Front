@@ -74,21 +74,12 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ unreadCount, onMa
 
     return (
         <div className='relative' ref={popupRef}>
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className='relative transition'
-            >
-                <img
-                    src='/img/notification.svg'
-                    alt='notification'
-                    className='h-5'
-                />
+            <button onClick={() => setIsOpen(!isOpen)} className='relative transition'>
+                <img src='/img/notification.svg' alt='notification' className='h-5' />
 
                 {/* 읽지 않은 알림 배지 */}
                 {unreadCount > 0 && (
-                    <span
-                        className='absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full'
-                    >
+                    <span className='absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full'>
                         {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                 )}

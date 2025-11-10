@@ -1,7 +1,6 @@
 import { FC } from 'react'; // useEffect, useRef, useState 제거
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faComment } from '@fortawesome/free-solid-svg-icons'; // faEllipsisVertical 제거
-import { getServerURL } from '@shared/lib';
 import { FeedWrapper } from '@pages/feed/component/FeedList';
 import { useNavigate } from 'react-router-dom';
 

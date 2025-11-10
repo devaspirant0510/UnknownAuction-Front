@@ -2,8 +2,6 @@ import React, { FC, useCallback } from 'react';
 import { HeartIcon } from 'lucide-react';
 import { axiosClient, getServerURL } from '@shared/lib';
 import { ApiResult } from '@entities/common';
-import { Button } from '@shared/components/ui/button.tsx';
-import { useAuthUser } from '@shared/hooks/useAuthUser.tsx';
 import Cookies from 'js-cookie';
 import { useQueryClient } from '@tanstack/react-query';
 import { AuctionInfoData } from '@entities/auction/model';

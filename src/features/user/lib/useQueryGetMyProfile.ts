@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { httpFetcher } from '@shared/lib';
-import { AccountDto, MyInfo } from '@entities/user/model';
+import { MyInfo } from '@entities/user/model';
 import { ApiResult } from '@entities/common';
 
 export const useQueryGetMyProfile = () => {

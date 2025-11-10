@@ -1,9 +1,7 @@
 import React, { FC, useMemo } from 'react';
-import { ChatDto, ChatEntity } from '@entities/auction/model';
+import { ChatDto } from '@entities/auction/model';
 import { ProfileImage } from '@shared/ui';
-import { useAuthStore } from '@shared/store/AuthStore.ts';
-import { Crown, CrownIcon } from 'lucide-react';
-import { Badge } from '@shared/components/ui';
+import { CrownIcon } from 'lucide-react';
 
 type Props = {
     data: ChatDto;

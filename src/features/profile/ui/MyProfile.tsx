@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ProfileImage } from '@shared/ui';
 import { ShareProfileModal } from '@/features/profile/ui/ShareProfileModal.tsx';
-import {Link} from "react-router";
+import { Link } from 'react-router';
 
 interface User {
     nickname: string;
@@ -92,7 +92,9 @@ const MyProfile = ({
                             }}
                         >
                             <span style={{ color: '#969696' }}>관심 상품</span>
-                            <span style={{ color: '#F7A17E', fontSize: '24px', fontWeight: 'bold' }}>
+                            <span
+                                style={{ color: '#F7A17E', fontSize: '24px', fontWeight: 'bold' }}
+                            >
                                 {wishListCount || 0}
                             </span>
                         </div>

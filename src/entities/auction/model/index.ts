@@ -1,4 +1,4 @@
-import { Account, User } from '@entities/user/model';
+import { Account } from '@entities/user/model';
 
 export enum DELIVERY_TYPE {
     DIRECT = 'DIRECT',

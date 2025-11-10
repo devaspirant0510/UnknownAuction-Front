@@ -22,7 +22,7 @@ const HotFeedList = () => {
             <div className={'text-xl text-center text-[#F7A17E] mt-4 mb-20'}>HOT COMMUNITY</div>
 
             {/* 2. Link 컴포넌트로 "+더보기" 텍스트를 감싸줍니다. */}
-            <Link to="/community">
+            <Link to='/community'>
                 <div className={'text-end text-uprimary mb-2 mr-2 cursor-pointer hover:underline'}>
                     +더보기
                 </div>

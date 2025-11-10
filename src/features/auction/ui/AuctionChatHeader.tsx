@@ -1,9 +1,7 @@
 import React, { FC } from 'react';
-import { Auction } from '@entities/auction/model';
 import BackButton from '@shared/ui/BackButton.tsx';
 import { useQueryGetAuctionById } from '@/features/auction/lib';
 import { DateUtil } from '@shared/lib';
-import { BaseLayout } from '@shared/layout';
 
 type Props = {
     auctionId: number;

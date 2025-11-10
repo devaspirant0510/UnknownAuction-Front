@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { Link, useNavigate } from 'react-router';
@@ -14,7 +14,6 @@ import {
     AlertDialogDescription,
 } from '@shared/components/ui/alert-dialog';
 import { axiosClient } from '@shared/lib/axiosClient.ts';
-import { Button } from '@shared/components/ui/button.tsx';
 import UserProfile from '@/features/user/ui/UserProfile.tsx';
 import { BellIcon, SearchIcon } from 'lucide-react';
 import NotificationPopup from '@/widgets/notification/NotificationPopup.tsx';

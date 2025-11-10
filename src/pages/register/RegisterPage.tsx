@@ -25,7 +25,6 @@ import {
     DialogDescription,
 } from '@shared/components/ui/dialog';
 import { ApiResult } from '@entities/common';
-import axios from 'axios';
 import { useAuthStore } from '@shared/store/AuthStore.ts';
 import { Navigate } from 'react-router';
 function usePreventBackLeave(condition) {

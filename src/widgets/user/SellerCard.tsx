@@ -1,8 +1,6 @@
 import React, { FC } from 'react';
-import UserProfile from '@/features/user/ui/UserProfile.tsx';
-import { Account, AccountDto } from '@entities/user/model';
+import { AccountDto } from '@entities/user/model';
 import { Badge } from '@shared/components/ui/badge.tsx';
-import userProfile from '@/features/user/ui/UserProfile.tsx';
 
 type Props = {
     userDto: AccountDto;

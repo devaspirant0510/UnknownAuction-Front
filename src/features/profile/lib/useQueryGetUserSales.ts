@@ -16,7 +16,7 @@ export const useQueryGetUserSales = (userId: string | undefined) => {
                     headers: {
                         Authorization: `Bearer ${Cookies.get('access_token') || ''}`,
                     },
-                }
+                },
             );
             return response.data;
         },

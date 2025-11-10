@@ -1,4 +1,4 @@
-import React, { act, FC } from 'react';
+import React, { FC } from 'react';
 
 type Props = {
     value: string;

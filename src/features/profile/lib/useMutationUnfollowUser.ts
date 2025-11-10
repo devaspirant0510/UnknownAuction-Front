@@ -4,14 +4,11 @@ import Cookies from 'js-cookie';
 import { ApiResult } from '@entities/common';
 
 const unfollowUser = (userId: number) => {
-    return axiosClient.delete<ApiResult<boolean>>(
-        `/api/v1/profile/unfollow/${userId}`,
-        {
-            headers: {
-                Authorization: `Bearer ${Cookies.get('access_token') || ''}`,
-            },
+    return axiosClient.delete<ApiResult<boolean>>(`/api/v1/profile/unfollow/${userId}`, {
+        headers: {
+            Authorization: `Bearer ${Cookies.get('access_token') || ''}`,
         },
-    );
+    });
 };
 
 export const useMutationUnfollowUser = () => {

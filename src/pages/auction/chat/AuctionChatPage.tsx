@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { BaseLayout, MainLayout } from '@shared/layout';
 import AuctionChatHeader from '@/features/auction/ui/AuctionChatHeader.tsx';
 import { useNavigate, useParams } from 'react-router';
@@ -9,27 +9,26 @@ import StompClient from '@/features/auction/ui/StompClient.tsx';
 import UserProfile from '@/features/user/ui/UserProfile.tsx';
 import { useAuthUser } from '@shared/hooks/useAuthUser.tsx';
 import AuctionStatus from '@/features/auction/ui/AuctionStatus.tsx';
-import BiddingDialog from '@widgets/auction/dialog/BiddingDialog.tsx';
 import { useAuthStore } from '@shared/store/AuthStore.ts';
 import { toast } from 'react-toastify';
 
 type Params = {
-    id: number;
+    id: string;
 };
 const AuctionChatPage = () => {
     const { id } = useParams<Params>();
     const [nickname, userId] = useAuthUser();
     const navigate = useNavigate();
     const { userAuth } = useAuthStore();
-    if (!id) {
-        return <>404 잘못된 접근입니다.</>;
-    }
     useEffect(() => {
         if (!userAuth) {
             toast('잘못된 접근입니다.', { type: 'error' });
             navigate(-1);
         }
     }, [userAuth]);
+    if (!id) {
+        return <>404 잘못된 접근입니다.</>;
+    }
     return (
         <div>
             <MainLayout>{}</MainLayout>

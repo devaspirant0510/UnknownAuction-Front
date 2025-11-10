@@ -13,7 +13,7 @@ import {
     PackageXIcon,
     PlusCircleIcon,
 } from 'lucide-react';
-import { getServerURL, DateUtil } from '@shared/lib';
+import { DateUtil } from '@shared/lib';
 import { Spinner } from '@shared/components/ui/spinner.tsx';
 import AuctionItemSkeleton from '@widgets/skeleton/AuctionItemSkeleton.tsx';
 

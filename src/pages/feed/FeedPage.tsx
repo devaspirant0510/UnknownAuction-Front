@@ -2,8 +2,7 @@ import WritePost from '@pages/feed/component/WritePost.tsx';
 import FeedList from '@pages/feed/component/FeedList.tsx';
 import React, { useState } from 'react';
 import { FeedModal } from '@pages/feed/component/FeedModal.tsx';
-import { Header } from '@widgets/ui';
-import { AppLayout, BaseLayout } from '@shared/layout';
+import { AppLayout } from '@shared/layout';
 import { Column, Row } from '@shared/ui';
 
 const FeedPage = () => {

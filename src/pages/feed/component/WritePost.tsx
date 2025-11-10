@@ -19,22 +19,13 @@ const WritePost = ({ onClick }: { onClick: () => void }) => {
                     />
                 </div>
                 <div className='flex items-center gap-3 ml-4'>
-                    <button
-                        disabled
-                        className='bg-transparent text-gray-400 cursor-not-allowed'
-                    >
+                    <button disabled className='bg-transparent text-gray-400 cursor-not-allowed'>
                         <FontAwesomeIcon icon={faFaceSmile} />
                     </button>
-                    <button
-                        disabled
-                        className='bg-transparent text-gray-400 cursor-not-allowed'
-                    >
+                    <button disabled className='bg-transparent text-gray-400 cursor-not-allowed'>
                         <FontAwesomeIcon icon={faImage} />
                     </button>
-                    <button
-                        disabled
-                        className='bg-transparent text-gray-400 cursor-not-allowed'
-                    >
+                    <button disabled className='bg-transparent text-gray-400 cursor-not-allowed'>
                         <FontAwesomeIcon icon={faEllipsisH} />
                     </button>
                 </div>

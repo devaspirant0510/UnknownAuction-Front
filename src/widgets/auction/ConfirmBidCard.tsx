@@ -4,7 +4,6 @@ import { ConfirmedBid } from '@entities/auction/model';
 import { Card } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
-import { getServerURL } from '@shared/lib';
 
 /**
  * 헬퍼 함수: 숫자를 화폐 단위(포인트)로 포맷팅

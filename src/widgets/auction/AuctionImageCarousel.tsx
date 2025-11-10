@@ -7,10 +7,9 @@ import {
 } from '@shared/components/ui/carousel.tsx';
 import { Card, CardContent, CardFooter } from '@shared/components/ui/card.tsx';
 import { FileEntity } from '@entities/auction/model';
-import { HeartIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import AuctionWishListButton from '@/features/auction/ui/AuctionWishListButton.tsx';
 import { useParams } from 'react-router';
-import { getServerURL } from '@shared/lib';
 import { Button } from '@shared/components/ui/button.tsx';
 
 type Props = {

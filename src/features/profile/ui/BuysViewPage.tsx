@@ -16,13 +16,14 @@ const BuysViewPage = () => {
         }
 
         // 유효한 데이터(auction 객체가 있는)만 필터링
-        const validItems = data.data.filter(item =>
-            typeof item === 'object' && item !== null && item.auction
+        const validItems = data.data.filter(
+            (item) => typeof item === 'object' && item !== null && item.auction,
         );
 
         // 최신 구매순 (경매 생성일 기준 내림차순) 정렬
-        validItems.sort((a, b) =>
-            new Date(b.auction.createdAt).getTime() - new Date(a.auction.createdAt).getTime()
+        validItems.sort(
+            (a, b) =>
+                new Date(b.auction.createdAt).getTime() - new Date(a.auction.createdAt).getTime(),
         );
 
         return validItems;
@@ -30,10 +31,16 @@ const BuysViewPage = () => {
 
     const renderContent = () => {
         if (isLoading) {
-            return <div className='py-20 text-center text-gray-500'>구매 목록을 불러오는 중...</div>;
+            return (
+                <div className='py-20 text-center text-gray-500'>구매 목록을 불러오는 중...</div>
+            );
         }
         if (isError) {
-            return <div className='py-20 text-center text-red-500'>구매 목록을 불러오는데 실패했습니다.</div>;
+            return (
+                <div className='py-20 text-center text-red-500'>
+                    구매 목록을 불러오는데 실패했습니다.
+                </div>
+            );
         }
         if (validPurchases.length === 0) {
             return <div className='py-20 text-center text-gray-500'>구매 내역이 없습니다.</div>;

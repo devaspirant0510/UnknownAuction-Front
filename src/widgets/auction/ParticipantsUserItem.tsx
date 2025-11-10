@@ -2,7 +2,6 @@ import React, { FC } from 'react';
 import { AuctionParticipateUser } from '@entities/auction/model';
 import { Divider, ProfileImage } from '@shared/ui';
 import { Button } from '@shared/components/ui/button.tsx';
-import { Divide } from 'lucide-react';
 
 type Props = {
     data: AuctionParticipateUser;

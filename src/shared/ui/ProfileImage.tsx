@@ -1,5 +1,4 @@
 import React, { FC } from 'react';
-import { getServerURL } from '@shared/lib';
 
 type Props = {
     src?: string | null;

@@ -1,9 +1,7 @@
 // components/CommentInput.tsx
 import { useState } from 'react';
-import Cookies from 'js-cookie';
 import { axiosClient, getServerURL, toastSuccess } from '@shared/lib';
 import { useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-toastify';
 
 interface CommentInputProps {
     feedId: number | string;

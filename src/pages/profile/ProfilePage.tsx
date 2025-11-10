@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import MyProfile from '@/features/profile/ui/MyProfile.tsx';
 import MyWallet from '@/features/profile/ui/MyWallet.tsx';
 import MyActive from '@/features/profile/ui/MyActive.tsx';
@@ -12,11 +12,11 @@ import { useAuthUser } from '@shared/hooks/useAuthUser.tsx';
 import { useQueryGetAccountStatus } from '@/features/profile/lib/useQueryGetAccountStatus.ts';
 import { EditProfileModal } from '@/features/profile/ui/EditProfileModal.tsx';
 import { AppLayout } from '@shared/layout';
-import {toast} from "react-toastify";
+import { toast } from 'react-toastify';
 import { useAuthStore } from '@shared/store/AuthStore.ts';
 import { useNavigate } from 'react-router';
-import NotFoundPage from "@/pages/common/NotFoundPage";
-import {LoadingPage} from "@/pages/common";
+import NotFoundPage from '@/pages/common/NotFoundPage';
+import { LoadingPage } from '@/pages/common';
 
 export const ProfilePage = () => {
     const [_, id] = useAuthUser();
@@ -48,7 +48,7 @@ export const ProfilePage = () => {
     }
 
     if (isError) {
-        console.error("프로필 로딩 오류:", error);
+        console.error('프로필 로딩 오류:', error);
         return <NotFoundPage />;
     }
 

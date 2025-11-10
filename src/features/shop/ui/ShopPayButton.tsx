@@ -2,8 +2,6 @@
 import React from 'react';
 import { Bootpay } from '@bootpay/client-js';
 import { useMutationPaymentSuccess } from '@/features/shop/lib/useMutationPaymentSuccess.ts';
-import Cookies from 'js-cookie';
-import { parseJwtPayload } from '@shared/lib/jwtUtils.ts';
 import { useAuthStore } from '@shared/store/AuthStore.ts';
 
 export type ShopPayButtonProps = {

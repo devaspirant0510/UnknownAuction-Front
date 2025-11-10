@@ -3,8 +3,6 @@ import React from 'react';
 import '@app/index.css';
 import { App } from '@/app';
 
-import { worker } from '@app/mocks';
-
 async function enableMocking() {
     // if (import.meta.env.VITE_MODE === "development") {
     //     await worker.start()

@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React from 'react';
 import { useParams } from 'react-router';
 import { AuctionInfo, RecommendsGoods } from '@/features/auction/ui';
 import { BaseLayout, MainLayout } from '@shared/layout';

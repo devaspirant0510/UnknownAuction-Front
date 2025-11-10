@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { MainLayout } from '@shared/layout';
 import ImageUploader from '@/pages/ProductUpload/components/ImageUploader';
 import TitleInput from '@/pages/ProductUpload/components/TitleInput';
 import DescriptionInput from '@/pages/ProductUpload/components/DescriptionInput';
@@ -8,12 +7,11 @@ import AuctionInfoInputs from '@/pages/ProductUpload/components/AuctionInfoInput
 import DeliveryOptions from '@/pages/ProductUpload/components/DeliveryOptions';
 import SubmitButtons from '@/pages/ProductUpload/components/SubmitButtons';
 import CategorySelect from '@/pages/ProductUpload/components/CategorySelect';
-import Cookies from 'js-cookie';
 import { axiosClient, DateUtil, getServerURL } from '@shared/lib';
 import { toast } from 'react-toastify';
-import { Navigate, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { useAuthStore } from '@shared/store/AuthStore.ts';
-import {AppLayout} from "@/shared/layout";
+import { AppLayout } from '@/shared/layout';
 
 export default function ProductUploadPage() {
     const [title, setTitle] = useState('');

@@ -1,7 +1,5 @@
 import { QueryFunctionContext } from '@tanstack/react-query';
 import { axiosClient } from '@shared/lib/axiosClient.ts';
-import { AxiosError, AxiosResponse } from 'axios';
-import Cookies from 'js-cookie';
 import { ApiException } from '@shared/lib/ApiException.ts';
 
 export const httpFetcher = async <T>(queryContext: QueryFunctionContext): Promise<T> => {

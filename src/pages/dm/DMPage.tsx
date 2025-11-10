@@ -31,12 +31,12 @@ const DMPage = () => {
         const loadRooms = async () => {
             try {
                 setIsLoadingRooms(true);
-                const response = await axiosClient.get(
-                    `${getServerURL()}/api/dm/rooms`
-                );
+                const response = await axiosClient.get(`${getServerURL()}/api/dm/rooms`);
                 if (response.data && response.data.length > 0) {
                     const sortedRooms = response.data.sort(
-                        (a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
+                        (a, b) =>
+                            new Date(b.lastMessageTime).getTime() -
+                            new Date(a.lastMessageTime).getTime(),
                     );
                     setRooms(sortedRooms);
                     // 최초 로딩 시에만 채팅방 선택
@@ -62,9 +62,7 @@ const DMPage = () => {
 
     const refreshRooms = useCallback(async () => {
         try {
-            const response = await axiosClient.get(
-                `${getServerURL()}/api/dm/rooms`
-            );
+            const response = await axiosClient.get(`${getServerURL()}/api/dm/rooms`);
             if (response.data) {
                 setRooms(response.data);
             }
@@ -98,9 +96,9 @@ const DMPage = () => {
                 />
             )}
 
-            <div className="flex gap-6 h-[90vh] bg-transparent p-4">
+            <div className='flex gap-6 h-[90vh] bg-transparent p-4'>
                 {/* 왼쪽: 채팅방 목록 */}
-                <div className="rounded-2xl bg-white shadow-lg overflow-hidden">
+                <div className='rounded-2xl bg-white shadow-lg overflow-hidden'>
                     <DMRoomList
                         rooms={rooms}
                         selectedRoomId={selectedRoomId}
@@ -111,8 +109,11 @@ const DMPage = () => {
 
                 {/* 오른쪽: 채팅 화면 */}
                 {selectedRoomId && selectedParticipantId ? (
-                    <div className="flex-1 flex flex-col rounded-2xl bg-white shadow-lg overflow-hidden">
-                        <DMChatHeader roomId={selectedRoomId} participantId={selectedParticipantId} />
+                    <div className='flex-1 flex flex-col rounded-2xl bg-white shadow-lg overflow-hidden'>
+                        <DMChatHeader
+                            roomId={selectedRoomId}
+                            participantId={selectedParticipantId}
+                        />
 
                         <DMStompClient roomId={selectedRoomId}>
                             {(client, roomId) => (
@@ -136,8 +137,8 @@ const DMPage = () => {
                         </DMStompClient>
                     </div>
                 ) : (
-                    <div className="flex-1 flex items-center justify-center rounded-2xl bg-white shadow-lg">
-                        <p className="text-gray-400">채팅방을 선택하세요</p>
+                    <div className='flex-1 flex items-center justify-center rounded-2xl bg-white shadow-lg'>
+                        <p className='text-gray-400'>채팅방을 선택하세요</p>
                     </div>
                 )}
             </div>

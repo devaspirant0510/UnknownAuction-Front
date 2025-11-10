@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/lib/utils'; // shadcn 기본 유틸
+// shadcn 기본 유틸
 import { LayoutDashboard, Users, Package, DollarSign, MessageSquare, Folder } from 'lucide-react';
 
 type Props = {

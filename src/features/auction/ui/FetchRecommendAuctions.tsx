@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { useQueryRecommendAuctions } from '@/features/auction/lib/useQueryRecommendAuctions.ts';
-import { Auction, AuctionData } from '@entities/auction/model';
+import { AuctionData } from '@entities/auction/model';
 
 type Props = {
     id: number;

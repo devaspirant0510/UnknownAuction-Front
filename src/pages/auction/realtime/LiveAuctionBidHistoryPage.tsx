@@ -1,6 +1,5 @@
 import React from 'react';
 import { MainLayout } from '@shared/layout';
-import { useQueryGetAuctionHistory } from '@/features/auction/lib';
 import { DateUtil } from '@/shared/lib/dateUtils.ts';
 import { useParams } from 'react-router';
 import {
@@ -13,18 +12,9 @@ import {
     XAxis,
     YAxis,
 } from 'recharts';
-import { useQueryGetAuctionHistoryChart } from '@/features/auction/lib/useQueryGetAuctionHistoryChart.ts';
 import FetchAuctionBidHistoryChart from '@/features/auction/ui/FetchAuctionBidHistoryChart.tsx';
 import FetchAuctionBidHistory from '@/features/auction/ui/FetchAuctionBidHistory.tsx';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@shared/components/ui/table.tsx';
-import { ProfileImage } from '@shared/ui';
+
 import {
     Pagination,
     PaginationContent,

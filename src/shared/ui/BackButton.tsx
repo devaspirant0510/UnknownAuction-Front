@@ -1,5 +1,5 @@
 import React, { FC, useCallback } from 'react';
-import { ArrowLeftIcon, BackpackIcon } from 'lucide-react';
+import { ArrowLeftIcon } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 type Props = {

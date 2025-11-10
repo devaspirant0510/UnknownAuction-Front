@@ -47,19 +47,20 @@ const MyFeedList = () => {
 
         if (sortOrder === 'desc') {
             // 최신순 (desc): b의 시간이 a의 시간보다 커야 함 (최신)
-            sortableArray.sort((a, b) =>
-                new Date(b.feed.createdAt).getTime() - new Date(a.feed.createdAt).getTime()
+            sortableArray.sort(
+                (a, b) =>
+                    new Date(b.feed.createdAt).getTime() - new Date(a.feed.createdAt).getTime(),
             );
         } else {
             // 오래된순 (asc): a의 시간이 b의 시간보다 작아야 함 (과거)
-            sortableArray.sort((a, b) =>
-                new Date(a.feed.createdAt).getTime() - new Date(b.feed.createdAt).getTime()
+            sortableArray.sort(
+                (a, b) =>
+                    new Date(a.feed.createdAt).getTime() - new Date(b.feed.createdAt).getTime(),
             );
         }
 
         return sortableArray;
     }, [data?.data, sortOrder]);
-
 
     const renderContent = () => {
         if (isLoading) {

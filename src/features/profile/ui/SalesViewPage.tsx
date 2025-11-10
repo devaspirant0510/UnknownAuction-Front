@@ -22,19 +22,18 @@ const SalesViewPage = () => {
         const allSales = Array.isArray(data.data) ? [...data.data] : [];
 
         // [수정] 데이터가 객체이고 auction 속성이 있는지 필터링
-        const validSales = allSales.filter(sale => typeof sale === 'object' && sale !== null && sale.auction);
+        const validSales = allSales.filter(
+            (sale) => typeof sale === 'object' && sale !== null && sale.auction,
+        );
 
         // 유효한 데이터만 정렬
-        validSales.sort((a, b) =>
-            new Date(b.auction.createdAt).getTime() - new Date(a.auction.createdAt).getTime()
+        validSales.sort(
+            (a, b) =>
+                new Date(b.auction.createdAt).getTime() - new Date(a.auction.createdAt).getTime(),
         );
 
-        const ongoing = validSales.filter(
-            (sale) => new Date(sale.auction.endTime) > now
-        );
-        const completed = validSales.filter(
-            (sale) => new Date(sale.auction.endTime) <= now
-        );
+        const ongoing = validSales.filter((sale) => new Date(sale.auction.endTime) > now);
+        const completed = validSales.filter((sale) => new Date(sale.auction.endTime) <= now);
 
         return { ongoingSales: ongoing, completedSales: completed };
     }, [data?.data]);
@@ -57,10 +56,16 @@ const SalesViewPage = () => {
 
     const renderContent = () => {
         if (isLoading) {
-            return <div className='py-20 text-center text-gray-500'>판매 목록을 불러오는 중...</div>;
+            return (
+                <div className='py-20 text-center text-gray-500'>판매 목록을 불러오는 중...</div>
+            );
         }
         if (isError) {
-            return <div className='py-20 text-center text-red-500'>판매 목록을 불러오는데 실패했습니다.</div>;
+            return (
+                <div className='py-20 text-center text-red-500'>
+                    판매 목록을 불러오는데 실패했습니다.
+                </div>
+            );
         }
 
         return (
@@ -69,12 +74,8 @@ const SalesViewPage = () => {
                 onValueChange={(value) => setActiveTab(value as 'ongoing' | 'completed')}
             >
                 <TabsList className='grid w-full grid-cols-2 mb-6'>
-                    <TabsTrigger value='ongoing'>
-                        진행중 ({ongoingSales.length})
-                    </TabsTrigger>
-                    <TabsTrigger value='completed'>
-                        판매완료 ({completedSales.length})
-                    </TabsTrigger>
+                    <TabsTrigger value='ongoing'>진행중 ({ongoingSales.length})</TabsTrigger>
+                    <TabsTrigger value='completed'>판매완료 ({completedSales.length})</TabsTrigger>
                 </TabsList>
                 <TabsContent value='ongoing' className='mt-0'>
                     {renderSalesList(ongoingSales, '진행중인 상품이 없습니다.')}

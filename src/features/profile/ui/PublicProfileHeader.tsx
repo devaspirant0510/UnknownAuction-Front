@@ -73,18 +73,20 @@ export const PublicProfileHeader: FC<Props> = ({ userData, isMe }) => {
                                 onClick={handleFollowToggle} // [수정] 핸들러 변경됨
                                 disabled={isFollowLoading}
                             >
-                                {isFollowLoading
-                                    ? '처리 중...'
-                                    : following
-                                        ? '팔로잉'
-                                        : '팔로우'}
+                                {isFollowLoading ? '처리 중...' : following ? '팔로잉' : '팔로우'}
                             </Button>
                         )}
                     </div>
                     <div className='flex gap-6 text-sm sm:text-base'>
-                        <span>게시물 <span className='font-bold'>{feedCount}</span></span>
-                        <span>팔로워 <span className='font-bold'>{followerCount}</span></span>
-                        <span>팔로잉 <span className='font-bold'>{followingCount}</span></span>
+                        <span>
+                            게시물 <span className='font-bold'>{feedCount}</span>
+                        </span>
+                        <span>
+                            팔로워 <span className='font-bold'>{followerCount}</span>
+                        </span>
+                        <span>
+                            팔로잉 <span className='font-bold'>{followingCount}</span>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -94,13 +96,13 @@ export const PublicProfileHeader: FC<Props> = ({ userData, isMe }) => {
                 <DialogContent className='w-full max-w-[400px]'>
                     <DialogHeader>
                         <DialogTitle>팔로우 취소</DialogTitle>
-                        <DialogDescription className="pt-4">
+                        <DialogDescription className='pt-4'>
                             {/* 유저 닉네임을 넣어 구체적으로 물어봅니다. */}
-                            <span className="font-semibold">{user.nickname}</span>님의
-                            팔로우를 취소하시겠습니까?
+                            <span className='font-semibold'>{user.nickname}</span>님의 팔로우를
+                            취소하시겠습니까?
                         </DialogDescription>
                     </DialogHeader>
-                    <DialogFooter className="gap-2 pt-4">
+                    <DialogFooter className='gap-2 pt-4'>
                         <Button
                             variant='secondary'
                             onClick={() => setIsModalOpen(false)} // 취소 버튼

@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { axiosClient } from '@shared/lib';
-import { toast } from 'react-toastify';
 
 export const useIncreaseAuctionView = (auctionId: number) => {
     useEffect(() => {

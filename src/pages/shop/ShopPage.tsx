@@ -10,7 +10,7 @@ import {
     RotateCcw,
     Zap,
 } from 'lucide-react';
-import { AppLayout, MainLayout } from '@shared/layout';
+import { AppLayout } from '@shared/layout';
 import ShopPayButton from '@/features/shop/ui/ShopPayButton.tsx';
 import { getPaymentConfig } from '@/features/shop/lib/getPaymentConfig.ts';
 import AuthUser from '@/features/user/ui/AuthUser.tsx';
@@ -19,8 +19,8 @@ import { useAuthUser } from '@shared/hooks/useAuthUser.tsx';
 import { httpFetcher } from '@shared/lib';
 import { ApiResult } from '@entities/common';
 import { LoadingPage } from '@pages/common';
-import LoginPage from "@/pages/login/LoginPage";
-import {Link} from "react-router";
+import LoginPage from '@/pages/login/LoginPage';
+import { Link } from 'react-router';
 
 // 결제 수단 아이콘 매핑
 const paymentMethodIcons = {
@@ -50,7 +50,7 @@ const PointRechargePage = () => {
         isLoading,
         data: profileData,
         isError,
-        error
+        error,
     } = useQuery({
         queryKey: ['api', 'v1', 'profile', id],
         queryFn: httpFetcher<ApiResult<any>>,
@@ -67,7 +67,7 @@ const PointRechargePage = () => {
     }
 
     if (isError) {
-        console.error("포인트 페이지 프로필 로딩 오류:", error);
+        console.error('포인트 페이지 프로필 로딩 오류:', error);
         return (
             <AppLayout>
                 <div>데이터를 불러오는 데 실패했습니다.</div>
@@ -76,9 +76,7 @@ const PointRechargePage = () => {
     }
 
     if (!profileData || !profileData.data) {
-        return (
-            <LoginPage />
-        );
+        return <LoginPage />;
     }
 
     const { user } = profileData.data;
@@ -103,8 +101,8 @@ const PointRechargePage = () => {
                             <div className='space-y-6'>
                                 <div className='mb-6'>
                                     <p className='text-gray-600 text-sm'>
-                                        <span className='font-semibold'>{nickname}</span> 님의 보유 포인트
-                                        내역
+                                        <span className='font-semibold'>{nickname}</span> 님의 보유
+                                        포인트 내역
                                     </p>
                                 </div>
 
@@ -119,7 +117,8 @@ const PointRechargePage = () => {
                                                 총 보유 포인트
                                             </span>
                                             <span className='text-3xl font-bold'>
-                                                {currentPoints.toLocaleString()} <span className='text-xl'>p</span>
+                                                {currentPoints.toLocaleString()}{' '}
+                                                <span className='text-xl'>p</span>
                                             </span>
                                         </div>
 
@@ -142,7 +141,9 @@ const PointRechargePage = () => {
                                                 충전 후 포인트
                                             </span>
                                             <span className='text-4xl font-extrabold'>
-                                                {(currentPoints + Number(selectedAmount)).toLocaleString()}
+                                                {(
+                                                    currentPoints + Number(selectedAmount)
+                                                ).toLocaleString()}
                                                 <span className='text-2xl'>p</span>
                                             </span>
                                         </div>

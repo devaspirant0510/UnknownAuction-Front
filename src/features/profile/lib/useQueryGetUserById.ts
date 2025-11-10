@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { axiosClient } from '@shared/lib/axiosClient.ts';
 import { ApiResult } from '@entities/common';
-import {FileEntity} from "@/entities/auction/model";
+import { FileEntity } from '@/entities/auction/model';
 import Cookies from 'js-cookie';
 
 export interface Account {
@@ -45,7 +45,7 @@ export const useQueryGetUserById = (userId: string | undefined) => {
                     headers: {
                         Authorization: `Bearer ${Cookies.get('access_token') || ''}`,
                     },
-                }
+                },
             );
             return response.data; // httpFetcher와 동일하게 data를 반환
         },

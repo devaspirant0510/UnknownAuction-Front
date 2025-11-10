@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useRef } from 'react';
+import { FC, useEffect, useRef } from 'react';
 import * as StompJs from '@stomp/stompjs';
 import { IFrame } from '@stomp/stompjs';
 import { useAuthStore } from '@shared/store/AuthStore.ts';
@@ -22,9 +22,7 @@ const DMNotificationSubscriber: FC<Props> = ({ userId, onNotification }) => {
         const stompClient = new StompJs.Client({
             webSocketFactory: () =>
                 new WebSocket(
-                    `${
-                        import.meta.env.VITE_MODE === 'development' ? 'ws' : 'wss'
-                    }://${
+                    `${import.meta.env.VITE_MODE === 'development' ? 'ws' : 'wss'}://${
                         import.meta.env.VITE_MODE === 'development'
                             ? '127.0.0.1:8080'
                             : import.meta.env.VITE_SERVER_URL
