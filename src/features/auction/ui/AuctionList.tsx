@@ -1,6 +1,6 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { useInfiniteQueryGetAuction } from '@/features/auction/lib/useInfiniteQueryGetAuction';
+import { usePagingQueryGetAuction } from '@/features/auction/lib/usePagingQueryGetAuction.ts';
 import { Card, CardContent } from '@shared/components/ui/card.tsx';
 import { Button } from '@shared/components/ui/button.tsx';
 import {
@@ -14,8 +14,15 @@ import {
     PlusCircleIcon,
 } from 'lucide-react';
 import { DateUtil } from '@shared/lib';
-import { Spinner } from '@shared/components/ui/spinner.tsx';
 import AuctionItemSkeleton from '@widgets/skeleton/AuctionItemSkeleton.tsx';
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from '@shared/components/ui';
 
 type Props = {
     type: 'live' | 'blind';
@@ -24,48 +31,23 @@ type Props = {
 const AuctionList: FC<Props> = ({ type }) => {
     const location = useLocation();
     const navigate = useNavigate();
-    const [currentCategory, setCategory] = useState();
-    const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
-        useInfiniteQueryGetAuction(type, currentCategory);
-    const loaderRef = useRef<HTMLDivElement | null>(null);
-    const fetchingRef = useRef(false);
+    const [size, setSize] = useState(10);
+    const [page, setPage] = useState(1);
+
+    const [currentCategory, setCategory] = useState<string>();
+    const { data, isLoading, isError } = usePagingQueryGetAuction(
+        type,
+        currentCategory,
+        page,
+        size,
+    );
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const category = params.get('category'); // category 값 가져오기
         console.log(category);
-        setCategory(category);
-        // 여기서 category 바뀌었을 때 처리
+        setCategory(category!);
     }, [location.search]); // sear
-    useEffect(() => {
-        const loader = loaderRef.current;
-        if (!loader) return;
-
-        const observer = new IntersectionObserver(
-            (entries) => {
-                const target = entries[0];
-                if (
-                    target.isIntersecting &&
-                    hasNextPage &&
-                    !isFetchingNextPage &&
-                    !fetchingRef.current
-                ) {
-                    fetchingRef.current = true;
-                    fetchNextPage().finally(() => {
-                        fetchingRef.current = false;
-                    });
-                }
-            },
-            { rootMargin: '100px', threshold: 0 },
-        );
-
-        observer.observe(loader);
-
-        return () => {
-            observer.disconnect();
-        };
-    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
     const onClickAuctionItem = useCallback(
         (id: number) => {
             navigate(`/auction/${type}/${id}`);
@@ -84,15 +66,8 @@ const AuctionList: FC<Props> = ({ type }) => {
     if (isError) return <>에러 발생</>;
 
     // Normalize and flatten pages -> array of auction items
-    const allAuctions =
-        data?.pages?.flatMap((page) => {
-            const payload: any = (page as any).data ?? (page as any).content ?? page;
-            if (payload?.content && Array.isArray(payload.content)) return payload.content;
-            if (Array.isArray(payload)) return payload;
-            return [];
-        }) ?? [];
 
-    if (allAuctions.length === 0) {
+    if (data?.data?.content.length === 0) {
         return (
             <div className='flex flex-col items-center justify-center h-80 text-gray-500'>
                 <PackageXIcon size={64} className='mb-4 text-gray-400' />
@@ -109,7 +84,7 @@ const AuctionList: FC<Props> = ({ type }) => {
 
     return (
         <>
-            {allAuctions.map((v, index) => (
+            {data.data.content.map((v, index) => (
                 <Card
                     key={index}
                     className='my-4 cursor-pointer'
@@ -187,15 +162,82 @@ const AuctionList: FC<Props> = ({ type }) => {
                     </CardContent>
                 </Card>
             ))}
+            <div className='mt-6 flex justify-center'>
+                <Pagination>
+                    <PaginationContent>
+                        {/* 이전 페이지 */}
+                        <PaginationItem>
+                            <PaginationPrevious
+                                onClick={() => {
+                                    const params = new URLSearchParams(location.search);
+                                    params.set('page', String(page - 1));
+                                    if (page < data.data.totalPages) {
+                                        setPage(page + 1);
+                                        navigate(`${location.pathname}?${params.toString()}`, {
+                                            replace: false,
+                                        });
+                                    }
+                                }}
+                                className={page <= 1 ? 'pointer-events-none opacity-50' : ''}
+                            />
+                        </PaginationItem>
 
-            {/* 무한 스크롤 트리거 */}
-            <div ref={loaderRef} className='h-10 flex justify-center items-center'>
-                {isFetchingNextPage && (
-                    <div className={'w-full flex justify-center mt-2'}>
-                        <Spinner className={'size-8'} />
-                    </div>
-                )}
-                {!hasNextPage && <span>모든 경매를 불러왔어요 🎉</span>}
+                        {(() => {
+                            const total = data.data.totalPages;
+                            let start = Math.max(1, page - 5);
+                            const end = Math.min(total, start + 9);
+
+                            // end 때문에 start 재보정
+                            start = Math.max(1, end - 9);
+
+                            const arr = [];
+                            for (let i = start; i <= end; i++) {
+                                arr.push(
+                                    <PaginationItem key={i}>
+                                        <PaginationLink
+                                            onClick={() => {
+                                                const params = new URLSearchParams(location.search);
+                                                params.set('page', String(i));
+                                                setPage(i);
+                                                navigate(
+                                                    `${location.pathname}?${params.toString()}`,
+                                                    {
+                                                        replace: false,
+                                                    },
+                                                );
+                                            }}
+                                            className={i === page ? 'bg-uprimary text-white' : ''}
+                                        >
+                                            {i}
+                                        </PaginationLink>
+                                    </PaginationItem>,
+                                );
+                            }
+                            return arr;
+                        })()}
+
+                        {/* 다음 페이지 */}
+                        <PaginationItem>
+                            <PaginationNext
+                                onClick={() => {
+                                    const params = new URLSearchParams(location.search);
+                                    params.set('page', String(page + 1));
+                                    if (page < data.data.totalPages) {
+                                        setPage(page + 1);
+                                        navigate(`${location.pathname}?${params.toString()}`, {
+                                            replace: false,
+                                        });
+                                    }
+                                }}
+                                className={
+                                    page >= data.data.totalPages
+                                        ? 'pointer-events-none opacity-50'
+                                        : ''
+                                }
+                            />
+                        </PaginationItem>
+                    </PaginationContent>
+                </Pagination>
             </div>
         </>
     );

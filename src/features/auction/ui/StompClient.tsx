@@ -12,9 +12,6 @@ type Props = {
 };
 const StompClient: FC<Props> = ({ auctionId, children }) => {
     const queryClient = useQueryClient();
-    const [messages, setMessages] = useState([]);
-    const [msg, setMsg] = useState('');
-    const stompClient = useRef(null);
     const clientRef = useRef<any>(null);
     const [client, setClient] = useState<any>(null);
     const { accessToken } = useAuthStore();
@@ -48,7 +45,10 @@ const StompClient: FC<Props> = ({ auctionId, children }) => {
                     console.log('chatenti');
                     console.log(chatEntity);
                     await queryClient.refetchQueries({
-                        queryKey: ['api', 'v1', 'auction', Number(auctionId)],
+                        queryKey: ['api', 'v2', 'auction', Number(auctionId)],
+                    });
+                    await queryClient.refetchQueries({
+                        queryKey: ['api', 'v2', 'auction', 'chat', Number(auctionId)],
                     });
                     if (!chatEntity.biddingLog) {
                         // queryClient.setQueryData(
@@ -66,15 +66,20 @@ const StompClient: FC<Props> = ({ auctionId, children }) => {
                         //     },
                         // );
                     }
-                    queryClient.setQueryData(
-                        ['api', 'v2', 'auction', 'chat', Number(auctionId)],
-                        (prev) => {
-                            return {
-                                ...prev,
-                                data: [...prev.data, JSON.parse(data.body)],
-                            };
-                        },
-                    );
+                    // queryClient.setQueryData(
+                    //     ['api', 'v2', 'auction', 'chat', Number(auctionId)],
+                    //     (prev) => {
+                    //         console.log('======prev');
+                    //         console.log(prev);
+                    //         return {
+                    //             ...prev,
+                    //             data: {
+                    //                 ...prev.data,
+                    //                 content: [JSON.parse(data.body), prev.data.content],
+                    //             },
+                    //         };
+                    //     },
+                    // );
                 });
 
                 clientRef.current = clientdata;
