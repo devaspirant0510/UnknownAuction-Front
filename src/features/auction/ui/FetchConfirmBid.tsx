@@ -11,7 +11,7 @@ const FetchConfirmBid = forwardRef<HTMLDivElement, Props>(({ auctionId, children
 
     // When data is ready and this wrapper is mounted, scroll it into view
     useEffect(() => {
-        if (!data || !data.data) return;
+        if (!data) return;
         const el = (ref as React.RefObject<HTMLDivElement> | null)?.current;
         if (el) {
             // wait for paint to ensure layout is ready
@@ -28,8 +28,11 @@ const FetchConfirmBid = forwardRef<HTMLDivElement, Props>(({ auctionId, children
     if (isError) {
         return <>error</>;
     }
-    if (!data || !data?.data) {
+    if (!data) {
         return <>nodata</>;
+    }
+    if (!data.data) {
+        return <>입찰자가 없어 종료된경매</>;
     }
     return <div ref={ref}>{children(data.data)}</div>;
 });
