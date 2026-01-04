@@ -1,6 +1,7 @@
 import React from 'react';
 // shadcn 기본 유틸
 import { LayoutDashboard, Users, Package, DollarSign, MessageSquare, Folder } from 'lucide-react';
+import { Link } from 'react-router';
 
 type Props = {
     children: React.ReactNode;
@@ -9,32 +10,53 @@ type Props = {
 const menu = [
     {
         title: '유저관리',
-        items: ['전체 유저 조회', '신고내역관리'],
+        items: [
+            { value: '전체 유저 조회', link: '/admin/user' },
+            { value: '신고내역관리', link: '/admin/user' },
+        ],
         icon: <Users className='w-4 h-4 mr-2' />,
     },
     {
         title: '피드 관리',
-        items: ['전체 피드 조회', '신고내역관리'],
+        items: [
+            { value: '전체 피드 조회', link: '/admin/user' },
+            { value: '신고내역관리', link: '' },
+        ],
         icon: <LayoutDashboard className='w-4 h-4 mr-2' />,
     },
     {
         title: '상품관리',
-        items: ['전체 상품 조회', '블라인드경매', '실시간 경매', '신고내역 관리'],
+        items: [
+            { value: '블라인드경매', link: '/admin/auction/blind' },
+            { value: '실시간 경매', link: '/admin/auction/live' },
+            { value: '신고내역 관리', link: '' },
+        ],
         icon: <Package className='w-4 h-4 mr-2' />,
     },
     {
         title: '포인트/캐시 관리',
-        items: ['포인트 충전내역', '포인트 지급', '캐시 환전 처리'],
+        items: [
+            { value: '포인트 충전내역', link: '/admin/user' },
+            { value: '포인트 지급', link: '' },
+            { value: '캐시 환전 처리', link: '' },
+        ],
         icon: <DollarSign className='w-4 h-4 mr-2' />,
     },
     {
         title: '고객센터 관리',
-        items: ['Q&A 게시판 관리', '1대1 문의 관리'],
+        items: [
+            { value: 'Q&A 게시판 관리', link: '/admin/user' },
+            { value: '1대1 문의 관리', link: '' },
+        ],
         icon: <MessageSquare className='w-4 h-4 mr-2' />,
     },
     {
         title: '카테고리 관리',
-        items: ['추가', '수정', '삭제'],
+        items: [
+            { value: '추가', link: '/admin/user' },
+            { value: '수정', link: '' },
+            { value: '삭제', link: '' },
+        ],
         icon: <Folder className='w-4 h-4 mr-2' />,
     },
 ];
@@ -60,12 +82,14 @@ const AdminLayout = ({ children }: Props) => {
                                 </div>
                                 <ul className='ml-6 space-y-1'>
                                     {section.items.map((item) => (
-                                        <li
-                                            key={item}
-                                            className='text-sm text-gray-300 hover:text-white cursor-pointer'
-                                        >
-                                            • {item}
-                                        </li>
+                                        <Link to={item.link}>
+                                            <li
+                                                key={item.value}
+                                                className='text-sm text-gray-300 hover:text-white cursor-pointer'
+                                            >
+                                                • {item.value}
+                                            </li>
+                                        </Link>
                                     ))}
                                 </ul>
                             </div>
