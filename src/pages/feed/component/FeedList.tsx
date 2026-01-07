@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import { axiosClient, getServerURL, httpFetcher, pageSegmentBuilder } from '@shared/lib';
-import { ApiResult, Page } from '@entities/common';
+import { axiosClient, getServerURL, httpFetcher } from '@shared/lib';
+import { ApiResult } from '@entities/common';
 import { useNavigate } from 'react-router';
 import { faComment, faExclamation, faHeart, faShareNodes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -21,6 +21,7 @@ import {
 import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { FeedListResponse } from '@entities/feed/model';
 import { Spinner } from '@shared/components/ui/spinner.tsx';
+import { FeedAuctionPromotionCard } from '@/widgets/feed/FeedAuctionPromotionCard';
 
 const FeedList = () => {
     const queryClient = useQueryClient();
@@ -32,13 +33,19 @@ const FeedList = () => {
     const { isLoading, isError, data, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
         useInfiniteQuery({
             queryKey: ['api', 'v2', 'feed'],
-            queryFn: async ({ pageParam = 1 }) =>
-                httpFetcher<ApiResult<Page<FeedListResponse>>>({
-                    queryKey: ['api', 'v2', pageSegmentBuilder('feed', pageParam, 8)],
-                } as any),
-            getNextPageParam: (lastPage) =>
-                !lastPage.data?.last ? lastPage.data?.pageable.pageNumber + 2 : undefined,
-            initialPageParam: 1,
+            initialPageParam: undefined as number | undefined,
+            queryFn: async ({ pageParam }) => {
+                const cursorQuery = typeof pageParam === 'number' ? `?cursor=${pageParam}` : '';
+                return httpFetcher<ApiResult<FeedListResponse[]>>({
+                    queryKey: ['api', 'v2', `feed${cursorQuery}`],
+                });
+            },
+            getNextPageParam: (lastPage) => {
+                const items = lastPage.data ?? [];
+                if (items.length === 0) return undefined;
+                const lastId = items[items.length - 1]?.id;
+                return typeof lastId === 'number' ? lastId : undefined;
+            },
         });
 
     const [commentVisibleMap, setCommentVisibleMap] = useState<Record<number, boolean>>({});
@@ -88,7 +95,7 @@ const FeedList = () => {
         const likeStatus: Record<number, { isLiked: boolean; count: number }> = {};
 
         data.pages.forEach((page) => {
-            page.data?.content.forEach((item) => {
+            page.data?.forEach((item) => {
                 commentCounts[item.id] = item.commentCount;
                 likeStatus[item.id] = {
                     isLiked: item.liked ?? false,
@@ -109,8 +116,12 @@ const FeedList = () => {
         try {
             await axiosClient.patch(`${getServerURL()}/api/v1/feed/${feedId}/like`);
             await queryClient.invalidateQueries({ queryKey: ['api', 'v2', 'feed'] });
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || '좋아요 처리 중 오류 발생');
+        } catch (error: unknown) {
+            const message =
+                error && typeof error === 'object' && 'message' in error
+                    ? String((error as { message?: unknown }).message)
+                    : undefined;
+            toast.error(message || '좋아요 처리 중 오류 발생');
         } finally {
             setLikeLoadingMap((prev) => ({ ...prev, [feedId]: false }));
         }
@@ -126,15 +137,19 @@ const FeedList = () => {
             await axiosClient.delete(`${getServerURL()}/api/v1/feed/${feedId}`);
             toast('글이 삭제되었습니다.');
             queryClient.invalidateQueries({ queryKey: ['api', 'v2', 'feed'] });
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || '삭제 중 오류 발생');
+        } catch (error: unknown) {
+            const message =
+                error && typeof error === 'object' && 'message' in error
+                    ? String((error as { message?: unknown }).message)
+                    : undefined;
+            toast.error(message || '삭제 중 오류 발생');
         }
     };
 
     if (isLoading) return <>loading...</>;
-    if (isError) return <>{(error as any)?.message || 'error'}</>;
+    if (isError) return <>{(error as Error)?.message || 'error'}</>;
 
-    const allFeeds = data?.pages.flatMap((page) => page.data?.content ?? []) ?? [];
+    const allFeeds = data?.pages.flatMap((page) => page.data ?? []) ?? [];
 
     return (
         <div className='flex flex-col items-center gap-2 mt-8'>
@@ -142,7 +157,10 @@ const FeedList = () => {
                 <EditModal
                     feedId={editingFeedId}
                     initialContent={editingFeedData.contents}
-                    initialImages={editingFeedData.images}
+                    initialImages={editingFeedData.images.map((img) => ({
+                        url: img.url,
+                        fileName: String(img.fileId),
+                    }))}
                     onClose={() => {
                         setEditingFeedId(null);
                         setEditingFeedData(null);
@@ -169,15 +187,16 @@ const FeedList = () => {
                         {/* 상단 작성자 */}
                         <div className='flex items-start justify-between mb-2'>
                             <div className='flex items-center'>
-                                <ProfileImage
-                                    src={v.writerProfileImageUrl}
-                                    size={48}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (v.writerId) navigate(`/users/${v.writerId}`);
-                                    }}
-                                    style={{ cursor: v.writerId ? 'pointer' : 'default' }}
-                                />
+                                <div style={{ cursor: v.writerId ? 'pointer' : 'default' }}>
+                                    <ProfileImage
+                                        src={v.writerProfileImageUrl}
+                                        size={48}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (v.writerId) navigate(`/users/${v.writerId}`);
+                                        }}
+                                    />
+                                </div>
                                 <div className='ml-3'>
                                     <div className='font-semibold'>{v.writerName}</div>
                                     <div className='text-sm text-gray-400'>
@@ -216,6 +235,9 @@ const FeedList = () => {
                             <div className='text-gray-800 leading-relaxed mb-4 whitespace-pre-line line-clamp-10'>
                                 {v.contents}
                             </div>
+
+                            {v.feedAuction && <FeedAuctionPromotionCard auction={v.feedAuction} />}
+
                             {v.images.length > 0 && (
                                 <div className='flex gap-2 overflow-x-auto mb-3'>
                                     {v.images.map((img, idx) => (
@@ -263,7 +285,9 @@ const FeedList = () => {
             })}
 
             <div
-                ref={(el) => (loaderRef.current = el)}
+                ref={(el) => {
+                    loaderRef.current = el;
+                }}
                 className='h-10 flex justify-center items-center mb-8'
             >
                 {isFetchingNextPage && (
