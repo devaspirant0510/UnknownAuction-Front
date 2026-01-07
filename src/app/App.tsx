@@ -17,6 +17,7 @@ import CompanyPage from '@pages/info/CompanyPage.tsx';
 import TermPage from '@pages/info/TermPage.tsx';
 import PrivacyPage from '@pages/info/PrivacyPage.tsx';
 import InterestsViewPage from '@/features/profile/ui/InterestsViewPage';
+import { Navigate } from 'react-router';
 
 const HomePage = React.lazy(() => import('@pages/home/HomePage.tsx'));
 const FeedPage = React.lazy(() => import('@pages/feed/FeedPage.tsx'));
@@ -39,6 +40,8 @@ const LiveAuctionBidHistoryPage = React.lazy(
 );
 const RegisterSnsPage = React.lazy(() => import('@pages/register/RegisterSnsPage.tsx'));
 const AdminHomePage = React.lazy(() => import('@pages/admin/home/AdminHomePage.tsx'));
+const AdminUserPage = React.lazy(() => import('@/pages/admin/user/AdminUserPage'));
+const AdminLiveAuctionPage = React.lazy(() => import('@/pages/admin/auction/AdminLiveAuctionPage'));
 const BlindAuctionChatPage = React.lazy(
     () => import('@pages/auction/chat/BlindAuctionChatPage.tsx'),
 );
@@ -145,15 +148,18 @@ function App() {
                             path='/auction/live/:id/bid-history'
                             element={<LiveAuctionBidHistoryPage />}
                         />
+                        <Route path='/admin' element={<Navigate to='/admin/login' replace />} />
                         <Route path='/admin/home' element={<AdminHomePage />} />
+                        <Route path='/admin/user' element={<AdminUserPage />} />
+                        <Route path='/admin/auction/live' element={<AdminLiveAuctionPage />} />
                         <Route path='/shop' element={<ShopPage />} />
                         <Route path='/dm' element={<DMPage />} />
-                        <Route path='*' element={<NotFoundPage />} />
                         <Route path={'/company'} element={<CompanyPage />} />
                         <Route path={'/terms'} element={<TermPage />} />
                         <Route path={'/privacy'} element={<PrivacyPage />} />
                         <Route path='/profile/interests-view' element={<InterestsViewPage />} />
                         <Route path='/notifications' element={<NotificationListPage />} />
+                        <Route path='*' element={<NotFoundPage />} />
                     </Routes>
                     <FloatingMenu />
                     <ToastContainer hideProgressBar={true} autoClose={2000} />

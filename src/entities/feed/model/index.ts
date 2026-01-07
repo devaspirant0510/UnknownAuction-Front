@@ -5,6 +5,20 @@ export type FileProjection = {
     fileType: 'FEED' | 'PROFILE' | string;
 };
 
+export type FeedAuctionPromotion = {
+    auctionId: number;
+    categoryName: string | null;
+    title: string;
+    description: string;
+    likeCount: number | null;
+    viewCount: number;
+    startPrice: number;
+    status: 'BEFORE_START' | 'IN_PROGRESS' | 'ENDED' | string;
+    startTime: string;
+    endTime: string;
+    imageUrl: string;
+};
+
 export type FeedListResponse = {
     id: number;
     contents: string;
@@ -16,4 +30,7 @@ export type FeedListResponse = {
     commentCount: number;
     liked: boolean;
     images: FileProjection[];
+    feedAuction?: FeedAuctionPromotion | null;
 };
+
+export type { ConfirmBidItem } from './confirmBid';

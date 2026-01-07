@@ -1,21 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { axiosClient, getServerURL, httpFetcher, toastError } from '@shared/lib';
 import { toast } from 'react-toastify';
-import { ArrowUpDownIcon, ImagePlus, PackageIcon, X as XIcon, Loader2 } from 'lucide-react';
+import { ImagePlus, PackageIcon, X as XIcon, Loader2 } from 'lucide-react';
 import { useQueryClient, useMutation, useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/shared/components/ui/skeleton';
-import { ApiResult, Page } from '@entities/common';
+import { ApiResult } from '@entities/common';
 import { FeedListResponse } from '@entities/feed/model';
+import type { ConfirmBidItem } from '@/entities/feed/model';
 
 import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/shared/components/ui/collapsible';
+import { ConfirmBidSelectSection } from '@/features/feed/ui';
+import { ConfirmBidPreviewCard } from '@/widgets/feed/ConfirmBidPreviewCard';
 
 interface InfiniteData<T> {
     pages: T[];
-    pageParams: any[];
+    pageParams: unknown[];
 }
 
 interface ModalProps {
@@ -36,7 +39,7 @@ interface PromoResponse {
     data: PromoItem[];
     message: string;
     success: boolean;
-    error: any;
+    error: unknown;
     timestamp?: string;
 }
 
@@ -51,8 +54,14 @@ export const FeedModal = ({ onClose }: ModalProps) => {
     // Collapsible open/close 상태
     const [isPromoOpen, setPromoOpen] = useState(false);
 
+    // 거래내역 collapsible open/close 상태
+    const [isConfirmBidOpen, setConfirmBidOpen] = useState(false);
+
     // ✅ [신규] 선택된 홍보 상품을 저장할 state
     const [selectedPromo, setSelectedPromo] = useState<PromoItem | null>(null);
+
+    // ✅ [신규] 선택된 거래내역(낙찰/구매확정) 자랑 데이터
+    const [selectedConfirmBid, setSelectedConfirmBid] = useState<ConfirmBidItem | null>(null);
 
     useEffect(() => {
         return () => {
@@ -104,7 +113,7 @@ export const FeedModal = ({ onClose }: ModalProps) => {
             // ✅ content와 함께 auctionId도 data Blob에 포함!
             const dataToSubmit = {
                 content,
-                //auctionId: selectedPromo ? selectedPromo.auctionId : null,
+                auctionId: selectedPromo ? selectedPromo.auctionId : null,
             };
 
             formData.append(
@@ -115,7 +124,7 @@ export const FeedModal = ({ onClose }: ModalProps) => {
 
             const response = await axiosClient.post(`${getServerURL()}/api/v1/feed`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
-            } as any);
+            });
             return response.data;
         },
         onSuccess: (data) => {
@@ -129,18 +138,22 @@ export const FeedModal = ({ onClose }: ModalProps) => {
             setSelectedPromo(null); // ✅ [추가] 성공 시 선택된 상품도 리셋
             queryClient.setQueryData(
                 ['api', 'v2', 'feed'],
-                (oldData: InfiniteData<ApiResult<Page<FeedListResponse>>>) => {
+                (oldData: InfiniteData<ApiResult<FeedListResponse[]>> | undefined) => {
+                    if (!oldData) return oldData;
                     const newData = structuredClone(oldData);
-                    console.log(newData.pages[0].data?.content[0]);
-                    newData.pages[0].data?.content.unshift({ ...data.data });
-                    console.log(newData.pages[0].data?.content[0]);
+                    if (!newData.pages?.[0]?.data) return newData;
+                    newData.pages[0].data.unshift({ ...data.data });
                     return newData;
                 },
             );
             onClose();
         },
-        onError: (error: any) => {
-            toastError(error?.message || '게시글 작성 중 오류 발생');
+        onError: (error: unknown) => {
+            const message =
+                error && typeof error === 'object' && 'message' in error
+                    ? String((error as { message?: unknown }).message)
+                    : undefined;
+            toastError(message || '게시글 작성 중 오류 발생');
         },
     });
 
@@ -205,6 +218,14 @@ export const FeedModal = ({ onClose }: ModalProps) => {
                     </div>
                 )}
                 {/* ▲▲▲ [신규] 선택된 상품 카드뷰 ▲▲▲ */}
+
+                {/* ✅ 선택된 거래내역 미리보기 (X로 취소 가능) */}
+                {selectedConfirmBid && (
+                    <ConfirmBidPreviewCard
+                        item={selectedConfirmBid}
+                        onClear={() => setSelectedConfirmBid(null)}
+                    />
+                )}
 
                 <textarea
                     className={`w-full h-80 p-4 bg-orange-50 text-gray-700 border border-orange-100 rounded-md resize-none outline-none ${
@@ -341,13 +362,14 @@ export const FeedModal = ({ onClose }: ModalProps) => {
                             </Collapsible>
                             {/* ▲▲▲ Collapsible 부분 수정 ▲▲▲ */}
 
-                            <button
-                                type='button'
-                                className='inline-flex items-center gap-2 px-3 py-1 rounded-md text-uprimary hover:bg-uprimary/10 transition'
-                            >
-                                <ArrowUpDownIcon className='w-5 h-5' />
-                                <span className='font-medium text-sm'>거래내역</span>
-                            </button>
+                            {/* ▼▼▼ [신규] 거래내역 자랑하기 섹션 ▼▼▼ */}
+                            <ConfirmBidSelectSection
+                                open={isConfirmBidOpen}
+                                onOpenChange={setConfirmBidOpen}
+                                selected={selectedConfirmBid}
+                                onSelect={setSelectedConfirmBid}
+                            />
+                            {/* ▲▲▲ [신규] 거래내역 자랑하기 섹션 ▲▲▲ */}
                         </div>
                     </div>
                 </div>
