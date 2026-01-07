@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Gavel, ShieldQuestion, MessagesSquare, BarChartHorizontal, Crown } from 'lucide-react';
 
 const CompanyPage = () => {
@@ -33,13 +33,19 @@ const CompanyPage = () => {
         name: '이승호',
         github: 'https://github.com/devaspirant0510',
         role: '팀장 / 풀스택',
+        portfolio: null,
     };
     const teamData = [
-        { name: '김태현', github: 'https://github.com/mangosaet', role: '풀스택' },
-        { name: '이동헌', github: 'https://github.com/adkslkagl', role: '백엔드' },
-        { name: '이승엽', github: 'https://github.com/sylee0915', role: '백엔드' },
-        { name: '오지원', github: 'https://github.com/oh-jiwon', role: 'UI/UX 디자인' },
-        { name: '조주연', github: 'https://github.com/juyeon55', role: '풀스택' },
+        { name: '김태현', github: 'https://github.com/mangosaet', role: '풀스택', portfolio: null },
+        { name: '이동헌', github: 'https://github.com/adkslkagl', role: '백엔드', portfolio: null },
+        { name: '이승엽', github: 'https://github.com/sylee0915', role: '백엔드', portfolio: 'aa' },
+        {
+            name: '오지원',
+            github: 'https://github.com/oh-jiwon',
+            role: 'UI/UX 디자인',
+            portfolio: null,
+        },
+        { name: '조주연', github: 'https://github.com/juyeon55', role: '풀스택', portfolio: null },
     ];
 
     const handleMemberClick = (name: string) => {
@@ -210,15 +216,28 @@ const CompanyPage = () => {
                         <div
                             className={`transition-all duration-300 ease-in-out overflow-hidden text-center ${selectedMember === leaderData.name ? 'max-h-24 opacity-100 pt-3' : 'max-h-0 opacity-0'}`}
                         >
-                            <a
-                                href={leaderData.github}
-                                target='_blank'
-                                rel='noopener noreferrer'
-                                className='text-udark hover:text-uprimary transition-colors inline-block'
-                                aria-label={`${leaderData.name} 깃허브`}
-                            >
-                                <img src={'/img/github.png'} className='w-8 h-8' />
-                            </a>
+                            <div className='flex items-center justify-center gap-3'>
+                                <a
+                                    href={leaderData.github}
+                                    target='_blank'
+                                    rel='noopener noreferrer'
+                                    className='text-udark hover:text-uprimary transition-colors inline-block'
+                                    aria-label={`${leaderData.name} 깃허브`}
+                                >
+                                    <img src={'/img/github.png'} className='w-8 h-8' alt='GitHub' />
+                                </a>
+                                {leaderData.portfolio && (
+                                    <a
+                                        href={leaderData.portfolio}
+                                        target='_blank'
+                                        rel='noopener noreferrer'
+                                        className='text-udark hover:text-uprimary transition-colors text-sm font-semibold'
+                                        aria-label={`${leaderData.name} 포트폴리오`}
+                                    >
+                                        Portfolio
+                                    </a>
+                                )}
+                            </div>
                             <p className='mt-2 text-sm font-semibold text-uprimary'>
                                 {leaderData.role}
                             </p>
@@ -237,15 +256,44 @@ const CompanyPage = () => {
                             <div
                                 className={`transition-all duration-300 ease-in-out overflow-hidden text-center ${selectedMember === member.name ? 'max-h-24 opacity-100 pt-3' : 'max-h-0 opacity-0'}`}
                             >
-                                <a
-                                    href={member.github}
-                                    target='_blank'
-                                    rel='noopener noreferrer'
-                                    className='text-udark hover:text-uprimary transition-colors inline-block'
-                                    aria-label={`${member.name} 깃허브`}
-                                >
-                                    <img src={'/img/github.png'} className='w-8 h-8' />
-                                </a>
+                                <div className='flex items-center justify-center gap-3'>
+                                    <div className={'flex flex-col justify-center items-center'}>
+                                        <a
+                                            href={member.github}
+                                            target='_blank'
+                                            rel='noopener noreferrer'
+                                            className='text-udark hover:text-uprimary transition-colors inline-block'
+                                            aria-label={`${member.name} 깃허브`}
+                                        >
+                                            <img
+                                                src={'/img/github.png'}
+                                                className='w-8 h-8'
+                                                alt='GitHub'
+                                            />
+                                        </a>
+                                        <div className={'text-sm mt-1'}>깃허브</div>
+                                    </div>
+                                    {member.portfolio && (
+                                        <div
+                                            className={'flex flex-col justify-center items-center'}
+                                        >
+                                            <a
+                                                href={member.portfolio}
+                                                target='_blank'
+                                                rel='noopener noreferrer'
+                                                className=' text-udark hover:text-uprimary transition-colors text-sm font-semibold'
+                                                aria-label={`${member.name} 포트폴리오`}
+                                            >
+                                                <img
+                                                    src={'/img/portfolio.png'}
+                                                    className='w-8 h-8'
+                                                    alt='Portfolio'
+                                                />
+                                            </a>
+                                            <div className={'text-sm mt-1'}>포트폴리오</div>
+                                        </div>
+                                    )}
+                                </div>
                                 <p className='mt-2 text-sm font-semibold text-uprimary'>
                                     {member.role}
                                 </p>
@@ -269,7 +317,9 @@ const CompanyPage = () => {
                         무한합니다!
                     </p>
                     <button
-                        onClick={() => (window.location = '/')}
+                        onClick={() => {
+                            window.location.href = '/';
+                        }}
                         className='bg-white text-uprimary font-bold py-3 px-10 rounded-full shadow-lg hover:bg-ubackground1 hover:scale-105 transition-all duration-300 text-lg'
                     >
                         지금 바로 경매 참여하기!
@@ -277,7 +327,7 @@ const CompanyPage = () => {
                 </div>
             </footer>
 
-            <style jsx>{`
+            <style>{`
                 @keyframes fade-in {
                     from {
                         opacity: 0;
