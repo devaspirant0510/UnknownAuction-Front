@@ -38,7 +38,12 @@ const CompanyPage = () => {
     const teamData = [
         { name: '김태현', github: 'https://github.com/mangosaet', role: '풀스택', portfolio: null },
         { name: '이동헌', github: 'https://github.com/adkslkagl', role: '백엔드', portfolio: null },
-        { name: '이승엽', github: 'https://github.com/sylee0915', role: '백엔드', portfolio: 'aa' },
+        {
+            name: '이승엽',
+            github: 'https://github.com/sylee0915',
+            role: '백엔드',
+            portfolio: 'https://www.sylee0915.site/',
+        },
         {
             name: '오지원',
             github: 'https://github.com/oh-jiwon',
