@@ -114,6 +114,7 @@ export const FeedModal = ({ onClose }: ModalProps) => {
             const dataToSubmit = {
                 content,
                 auctionId: selectedPromo ? selectedPromo.auctionId : null,
+                confirmedBidId: selectedConfirmBid ? selectedConfirmBid.confirmBidId : null,
             };
 
             formData.append(

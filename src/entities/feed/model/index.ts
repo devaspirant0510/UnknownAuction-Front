@@ -31,6 +31,7 @@ export type FeedListResponse = {
     liked: boolean;
     images: FileProjection[];
     feedAuction?: FeedAuctionPromotion | null;
+    feedConfirmBid?: import('./confirmBid').FeedConfirmBid | null;
 };
 
-export type { ConfirmBidItem } from './confirmBid';
+export type { ConfirmBidItem, FeedConfirmBid } from './confirmBid';

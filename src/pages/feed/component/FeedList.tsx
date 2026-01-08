@@ -22,6 +22,7 @@ import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { FeedListResponse } from '@entities/feed/model';
 import { Spinner } from '@shared/components/ui/spinner.tsx';
 import { FeedAuctionPromotionCard } from '@/widgets/feed/FeedAuctionPromotionCard';
+import { FeedConfirmBidCard } from '@/widgets/feed/FeedConfirmBidCard';
 
 const FeedList = () => {
     const queryClient = useQueryClient();
@@ -237,6 +238,7 @@ const FeedList = () => {
                             </div>
 
                             {v.feedAuction && <FeedAuctionPromotionCard auction={v.feedAuction} />}
+                            {v.feedConfirmBid && <FeedConfirmBidCard item={v.feedConfirmBid} />}
 
                             {v.images.length > 0 && (
                                 <div className='flex gap-2 overflow-x-auto mb-3'>
