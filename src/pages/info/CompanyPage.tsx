@@ -33,7 +33,7 @@ const CompanyPage = () => {
         name: '이승호',
         github: 'https://github.com/devaspirant0510',
         role: '팀장 / 풀스택',
-        portfolio: null,
+        portfolio: "https://chlorinated-peripheral-27a.notion.site/2d32f64f80ba80c38846f89d34176a83?pvs=74"
     };
     const teamData = [
         { name: '김태현', github: 'https://github.com/mangosaet', role: '풀스택', portfolio: null },
