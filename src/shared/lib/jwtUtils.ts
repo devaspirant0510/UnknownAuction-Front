@@ -2,7 +2,7 @@ export type AccessTokenPayload = {
     email: string;
     exp: number;
     iat: number;
-    id: number;
+    id: string;
     nickname: string;
     profileUrl: string;
     role: 'CUSTOMER' | 'ADMIN' | 'SELLER';
