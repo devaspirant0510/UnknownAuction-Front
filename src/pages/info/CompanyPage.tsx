@@ -222,25 +222,35 @@ const CompanyPage = () => {
                             className={`transition-all duration-300 ease-in-out overflow-hidden text-center ${selectedMember === leaderData.name ? 'max-h-24 opacity-100 pt-3' : 'max-h-0 opacity-0'}`}
                         >
                             <div className='flex items-center justify-center gap-3'>
-                                <a
-                                    href={leaderData.github}
-                                    target='_blank'
-                                    rel='noopener noreferrer'
-                                    className='text-udark hover:text-uprimary transition-colors inline-block'
-                                    aria-label={`${leaderData.name} 깃허브`}
-                                >
-                                    <img src={'/img/github.png'} className='w-8 h-8' alt='GitHub' />
-                                </a>
-                                {leaderData.portfolio && (
+                                <div className='flex flex-col justify-center items-center'>
                                     <a
-                                        href={leaderData.portfolio}
+                                        href={leaderData.github}
                                         target='_blank'
                                         rel='noopener noreferrer'
-                                        className='text-udark hover:text-uprimary transition-colors text-sm font-semibold'
-                                        aria-label={`${leaderData.name} 포트폴리오`}
+                                        className='text-udark hover:text-uprimary transition-colors inline-block'
+                                        aria-label={`${leaderData.name} 깃허브`}
                                     >
-                                        Portfolio
+                                        <img src={'/img/github.png'} className='w-8 h-8' alt='GitHub' />
                                     </a>
+                                    <div className='text-sm mt-1'>깃허브</div>
+                                </div>
+                                {leaderData.portfolio && (
+                                    <div className='flex flex-col justify-center items-center'>
+                                        <a
+                                            href={leaderData.portfolio}
+                                            target='_blank'
+                                            rel='noopener noreferrer'
+                                            className='text-udark hover:text-uprimary transition-colors inline-block'
+                                            aria-label={`${leaderData.name} 포트폴리오`}
+                                        >
+                                            <img
+                                                src={'/img/notion-icon.webp'}
+                                                className='w-8 h-8 rounded-sm shadow-sm'
+                                                alt='Portfolio (Notion)'
+                                            />
+                                        </a>
+                                        <div className='text-sm mt-1'>포트폴리오</div>
+                                    </div>
                                 )}
                             </div>
                             <p className='mt-2 text-sm font-semibold text-uprimary'>
